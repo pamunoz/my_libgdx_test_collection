@@ -19,6 +19,7 @@ public class GFS extends ApplicationAdapter {
 		sprite = new Sprite(img);
 		sprite.setPosition(Gdx.graphics.getWidth() / 2 - sprite.getWidth() / 2,
 						   Gdx.graphics.getHeight() / 2 - sprite.getHeight() / 2);
+		sprite.setRotation(90f);
 	}
 
 	@Override
@@ -26,7 +27,7 @@ public class GFS extends ApplicationAdapter {
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		batch.begin();
-		batch.draw(sprite, sprite.getX(), sprite.getY());
+		batch.draw(sprite, sprite.getX(), sprite.getY(),0, 0, sprite.getWidth(), sprite.getHeight(), sprite.getScaleX(), sprite.getScaleY(), sprite.getRotation());
 		batch.end();
 	}
 	
