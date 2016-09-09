@@ -19,7 +19,8 @@ public class GFS extends ApplicationAdapter {
 		sprite = new Sprite(img);
 		sprite.setPosition(Gdx.graphics.getWidth() / 2 - sprite.getWidth() / 2,
 						   Gdx.graphics.getHeight() / 2 - sprite.getHeight() / 2);
-		sprite.setRotation(90f);
+		sprite.setRotation(15f);
+		sprite.setScale(4f);
 	}
 
 	@Override
