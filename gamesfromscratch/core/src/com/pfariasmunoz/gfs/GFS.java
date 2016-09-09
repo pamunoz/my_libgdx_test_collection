@@ -2,6 +2,7 @@ package com.pfariasmunoz.gfs;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -17,6 +18,7 @@ public class GFS extends ApplicationAdapter {
     GlyphLayout glyphLayout;
     String myText;
     String myText_2;
+    String myText_3;
     float xPos;
     float yPos;
 
@@ -42,6 +44,9 @@ public class GFS extends ApplicationAdapter {
         font = new BitmapFont(Gdx.files.internal("fonts/my_font.fnt"));
         myText = "Hola, como estan!";
         myText_2 = "Texto 2";
+        myText_3 = "I took one, one couse you left me\n"
+                + "Two, two for my family\n"
+                + "Three, three for my heartache";
         glyphLayout.setText(font, myText_2);
 	}
 
@@ -53,9 +58,13 @@ public class GFS extends ApplicationAdapter {
         // Draw the sprite
 		batch.draw(sprite, sprite.getX(), sprite.getY(), sprite.getWidth() / 2, sprite.getHeight() / 2, sprite.getWidth(), sprite.getHeight(), sprite.getScaleX(), sprite.getScaleY(), sprite.getRotation());
         // Draw my text
-        font.draw(batch, myText, xPos / 2, yPos / 2);
+        font.draw(batch, myText, xPos / 2, yPos - (yPos * 0.1f));
         // Draw my text with the glyphLayout bounds
         font.draw(batch, glyphLayout, xPos / 2 - glyphLayout.width / 2 , yPos / 2 - glyphLayout.height / 2);
+        // Draw a multi line
+        // and change color
+        font.setColor(Color.RED);
+        font.draw(batch, myText_3, xPos / 10, yPos - 100, xPos / 3, 5, true);
 		batch.end();
 	}
 	
