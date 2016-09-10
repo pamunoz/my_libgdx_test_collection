@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
@@ -13,6 +14,7 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.Timer;
 
 public class GFS extends ApplicationAdapter implements InputProcessor {
 	SpriteBatch batch;
@@ -27,10 +29,26 @@ public class GFS extends ApplicationAdapter implements InputProcessor {
     float xPos;
     float yPos;
     float scale = 1f;
+    Sound fartSound;
 
 	@Override
 	public void create () {
 
+        // testing sound
+        fartSound = Gdx.audio.newSound(Gdx.files.internal("fart.ogg"));
+        final long ourSoundId = fartSound.loop(1.0f, 1.0f, 0.0f);
+
+        // second instance of the same sound
+        fartSound.loop(1.0f, 2.0f, 0.0f);
+
+        // start our sound in a loop, and after 10 seconds it is going to stop
+        Timer.schedule(new Timer.Task() {
+            @Override
+            public void run() {
+                fartSound.pause(ourSoundId); // pause one instance
+                fartSound.pause(); // pause all instances of pause
+            }
+        }, 10);
 
 
         xPos = Gdx.graphics.getWidth();
@@ -97,7 +115,7 @@ public class GFS extends ApplicationAdapter implements InputProcessor {
 		img.dispose();
 	}
 
-    //=====Add Event driven iputs
+    //=====Add Event driven inputs ===
 
 
     @Override
