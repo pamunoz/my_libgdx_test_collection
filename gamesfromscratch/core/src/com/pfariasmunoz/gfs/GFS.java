@@ -26,9 +26,12 @@ public class GFS extends ApplicationAdapter implements InputProcessor {
     String myText_3;
     float xPos;
     float yPos;
+    float scale = 1f;
 
 	@Override
 	public void create () {
+
+
 
         xPos = Gdx.graphics.getWidth();
         yPos = Gdx.graphics.getHeight();
@@ -40,7 +43,7 @@ public class GFS extends ApplicationAdapter implements InputProcessor {
 		sprite.setPosition(Gdx.graphics.getWidth() / 2 - sprite.getWidth() / 2,
 						   Gdx.graphics.getHeight() / 2 - sprite.getHeight() / 2);
 		sprite.setRotation(0f);
-		sprite.setScale(10f, 6f);
+		sprite.setScale(scale);
 
 
         glyphLayout = new GlyphLayout();
@@ -130,11 +133,15 @@ public class GFS extends ApplicationAdapter implements InputProcessor {
 
     @Override
     public boolean mouseMoved(int screenX, int screenY) {
+        sprite.setPosition(screenX, Gdx.graphics.getHeight() - screenY );
         return false;
     }
 
     @Override
     public boolean scrolled(int amount) {
+
+        if (amount > 0) sprite.setScale(scale++);
+        if (amount < 0) sprite.setScale(scale--);
         return false;
     }
 }
