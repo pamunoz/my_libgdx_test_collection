@@ -2,75 +2,106 @@ package com.pfariasmunoz.mytetris;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
-import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Rectangle;
 
-/**
- * TODO: Start here
- *
- * In this exercise we have a project that draws a number of concentric rectangles as specified in
- * the COILS constant. The space between the rectangles is given by xStep and yStep.
- *
- * The rectangles are drawn using four lines between five points. Your task is to adjust the first
- * and last point such that each rectangle turns into a coil that meets up with the neighboring
- * coils inside and outside of it.
+/*
+TODO: Start here
+The Cantor gasket is a fractal where we start with a white square. We divide that square up into a 3x3 grid of smaller squares, then remove the middle square. Finally, we repeat the process on each of the remaining 8 squares.
  */
 
 public class MyTetris extends ApplicationAdapter {
-    // How many rectangles/coils to draw
-    private static final int COILS = 20;
-    int screenWidth;
-    int screenHeight;
-    int xStep;
-    int yStep;
-
     ShapeRenderer shapeRenderer;
+    // TODO: Set a constant for how many recursions to draw. 5 is a good place to start
+    int recursions = 6;
 
     @Override
-    public void create() {
+    public void create () {
         shapeRenderer = new ShapeRenderer();
-        screenWidth = Gdx.graphics.getWidth();
-        screenHeight = Gdx.graphics.getHeight();
-        xStep = screenWidth / 2 / COILS;
-        yStep = screenHeight / 2 / COILS;
     }
 
     @Override
-    public void dispose() {
-        super.dispose();
-        shapeRenderer.dispose();
-    }
-
-    @Override
-    public void render() {
+    public void render () {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        shapeRenderer.begin(ShapeType.Line);
+        // Finds a good place to draw our fractal
+        // Rectangle has members x,y for the lower left corner, and width and height
+        Rectangle bounds = findLargestSquare();
 
-        for (int i = 1; i < COILS; i++) {
+        // TODO: Begin a filled shapeRenderer batch
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
-            int xOffset = xStep * i;
-            int yOffset = yStep * i;
+        // TODO: Draw a white square matching the bounds
+        shapeRenderer.setColor(Color.WHITE);
+        shapeRenderer.rect(bounds.x, bounds.y, bounds.width, bounds.height);
 
-            // TODO: Make this coil reach back to the outer coil
-            Vector2 point1 = new Vector2(xOffset - xStep, yOffset);
-            Vector2 point2 = new Vector2(screenWidth - xOffset, yOffset);
-            Vector2 point3 = new Vector2(screenWidth - xOffset, screenHeight - yOffset);
-            Vector2 point4 = new Vector2(xOffset, screenHeight - yOffset);
+        // TODO: Set the working color to black, and call punchCantorGasket with the bounds
+        shapeRenderer.setColor(Color.BLACK);
+        punchCantorGasket(bounds.x, bounds.y, bounds.width, recursions);
 
-            // TODO: Make this coil stop before connecting back to itself
-            Vector2 point5 = new Vector2(xOffset, yOffset + yStep);
-
-            shapeRenderer.line(point1, point2);
-            shapeRenderer.line(point2, point3);
-            shapeRenderer.line(point3, point4);
-            shapeRenderer.line(point4, point5);
-        }
+        // TODO: End the batch
         shapeRenderer.end();
     }
-}
 
-// TODO: Challenge - Add truncated corners to the spiral
+    @Override
+    public void resize(int width, int height) {
+        shapeRenderer = new ShapeRenderer();
+    }
+
+
+    private void punchCantorGasket(float x, float y, float size, int recursions){
+
+        // Note that size means the height and width of the square
+        // TODO: Base case, if recursions = 0, return
+        if (recursions == 0) return;
+        float smallSize = size / 3.0f;
+        float newSmallSize = smallSize / 3;
+
+        // TODO: Draw a black square in the middle square
+
+        shapeRenderer.rect(x + smallSize, y + smallSize, smallSize, smallSize);
+
+        // TODO: Call punchCantorGasket on all 8 other squares
+        recursions--;
+
+
+        // bottom line
+        punchCantorGasket(x, y, smallSize, recursions);
+        punchCantorGasket(x + smallSize, y, smallSize, recursions);
+        punchCantorGasket(x + smallSize * 2, y, smallSize, recursions);
+
+        // top line
+        punchCantorGasket(x, y + smallSize * 2, smallSize, recursions);
+        punchCantorGasket(x + smallSize, y + smallSize * 2, smallSize, recursions);
+        punchCantorGasket(x + smallSize * 2, y + smallSize * 2, smallSize, recursions);
+
+        // left and right square
+        punchCantorGasket(x, y + smallSize, smallSize, recursions);
+        punchCantorGasket(x + smallSize * 2, y + smallSize, smallSize, recursions);
+
+
+        //punchCantorGasket(x, y, size, recursions);
+    }
+
+    private Rectangle findLargestSquare(){
+        Rectangle largestSquare = new Rectangle();
+        float screenWidth = Gdx.graphics.getWidth();
+        float screenHeight = Gdx.graphics.getHeight();
+
+        if (screenWidth > screenHeight){
+            largestSquare.x = (screenWidth - screenHeight)/2;
+            largestSquare.y = 0;
+            largestSquare.width = screenHeight;
+            largestSquare.height = screenHeight;
+        } else {
+            largestSquare.x = 0;
+            largestSquare.y = (screenHeight - screenWidth)/2;
+            largestSquare.width = screenWidth;
+            largestSquare.height = screenWidth;
+        }
+        return largestSquare;
+    }
+}
