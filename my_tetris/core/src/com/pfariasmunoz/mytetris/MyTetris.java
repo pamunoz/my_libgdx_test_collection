@@ -2,40 +2,82 @@ package com.pfariasmunoz.mytetris;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 
-/*
-TODO: Start here
-The Dragon Curve is a fractal made by a single line. It is formed of a series of turns, which can be constructed in the following way:
-0: L
-1: L + L + R
-2: LLR + L + LRR
-3: LLRLLRR + L + LLRRLRR
-The nth dragon curve is the n-1th dragon curve plus L, plus the n-1th dragon curve reversed and reflected.
-In this project we have split up the tasks of generating and drawing the dragon curve into separate classes.
+/**
+ * TODO: Start here!
+ *
+ * Everything in this class should seem pretty familiar. We're just creating a ShapeRenderer, and
+ * asking it to draw us some shapes. The interesting new things are, one, drawing circles and arcs
+ * (partial circles), and two, using multiple ShapeRenderer batches!
+ *
+ * Circles can be drawn using either ShapeType.Filled, or ShapeType.Line. The former draws a solid
+ * circle, the latter draws just the outline of the circle.
+ *
+ * If we want to draw both filled and outlined circles in the same frame, we need to use two
+ * different batches. We just start one batch with ShapeType.Filled, draw our shapes, and end the
+ * batch. Then we start another batch, this time with ShapeType.Line, draw again, and again,
+ * remember to end the batch.
+ *
+ * Circles have a dirty little secret though. They're not really circles. They're a fan of
+ * triangles, where all the triangles have their points at the center of the circle. ShapeRenderer
+ * will pick how many triangles to use so the circle looks smooth, but if you make super small
+ * circles, it might choose to use too few. You can use the optional last parameter to bump up the
+ * number of segments.
  */
 
 public class MyTetris extends ApplicationAdapter {
-    private float[] dragonCurve;
-    // Any more than 10 and we'll need to break up the polyline into multiple lines
-    private static final int RECURSIONS = 10;
-
-    private ShapeRenderer shapeRenderer;
+    ShapeRenderer renderer;
 
     @Override
-    public void create () {
-        dragonCurve = DragonCurveGenerator.generateDragonCurve(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), RECURSIONS);
-        shapeRenderer = new ShapeRenderer();
+    public void create() {
+        renderer = new ShapeRenderer();
     }
 
     @Override
-    public void render () {
+    public void render() {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        shapeRenderer.begin(ShapeType.Line);
-        shapeRenderer.polyline(dragonCurve);
-        shapeRenderer.end();
+
+        renderer.begin(ShapeType.Filled);
+
+        // The most basic circle you can draw, with the segment count set for you
+        renderer.setColor(Color.WHITE);
+        renderer.circle(100, 100, 90);
+
+        // We can also draw partial circle, or arc
+        renderer.setColor(Color.YELLOW);
+        renderer.arc(300, 100, 90, 45, 270);
+
+        // What happens when we set the segments count too low
+        renderer.setColor(Color.BLUE);
+        renderer.circle(500, 100, 90, 10);
+        renderer.end();
+
+        // Circles can be drawn in either Filled or Line mode!
+        renderer.begin(ShapeType.Line);
+        renderer.setColor(Color.GREEN);
+        renderer.circle(100, 300, 90);
+
+        // Let's draw target rings
+        renderer.setColor(Color.ORANGE);
+        for (int radius = 80; radius > 0; radius -= 10) {
+            renderer.circle(100, 300, radius);
+        }
+
+        // We can also draw the outline of an arc
+        renderer.setColor(Color.BROWN);
+        renderer.arc(300, 300, 90, 0, 90);
+
+        // Let's draw some a funky snail shell
+        renderer.setColor(Color.CHARTREUSE);
+        final int arcs = 20;
+        for (int i = 1; i < arcs; i++) {
+            renderer.arc(300, 300, (1 - 1.0f * i / arcs) * 90, 360.0f * i / arcs, 90);
+        }
+        renderer.end();
     }
 }
