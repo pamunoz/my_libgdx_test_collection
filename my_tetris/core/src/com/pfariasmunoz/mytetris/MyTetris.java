@@ -2,89 +2,113 @@ package com.pfariasmunoz.mytetris;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
-import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.utils.TimeUtils;
-
+import com.badlogic.gdx.utils.viewport.ExtendViewport;
 
 /**
  * TODO: Start here
  *
- * In this exercise, you'll create an OrthographicCamera, and use it to zoom in on a moving circle
+ * The goal of this exercise is just to draw a similey face. Feel free to get as artistic as you
+ * want, but we've provided a bunch of constants you may find useful.
+ *
+ * The tricky part is drawing the mouth. Since we can't draw thick lines, making a thick line for
+ * the mouth is hard. The trick is to draw two arcs. One black one, then a slightly smaller yellow
+ * one. The portion of the black arc that isn't covered by the yellow arc becomes the mouth.
  */
 public class MyTetris extends ApplicationAdapter {
 
-    private static final float BALL_RADIUS = 20;
-    private static final float PERIOD = 2000;
-    private static final float X_AMPLITUDE = 40;
-    private static final float Y_AMPLITUDE = 20;
-    private static final float X_CENTER = 100;
-    private static final float Y_CENTER = 100;
+    static final float FACE_CENTER_X = 20.0f;
+    static final float FACE_CENTER_Y = 20.0f;
+    static final float WORLD_WIDTH = 10.0f;
+    static final float WORLD_HEIGHT = 10.0f;
+    static final float FACE_RADIUS = 0.8f * WORLD_WIDTH / 2;
+    static final float EYE_OFFSET = 0.5f * FACE_RADIUS;
+    static final float EYE_RADIUS = 0.2f * FACE_RADIUS;
+    static final float MOUTH_OUTER_RADIUS = 0.8f * FACE_RADIUS;
+    static final float MOUTH_INNER_RADIUS = 0.6f * FACE_RADIUS;
+    static final float MOUTH_START_ANGLE = 180.0f;
+    static final float MOUTH_DEGREES = 180.0f;
+    static final int FACE_SEGMENTS = 40;
+    static final int EYE_SEGMENTS = 20;
+    static final int MOUTH_SEGMENTS = 20;
 
+    // TODO: Declare a ShapeRenderer and an ExtendViewport
     ShapeRenderer renderer;
-    long timeCreated;
-
-    //TODO: Declare an OrthographicCamera
-    OrthographicCamera camera;
-
+    ExtendViewport viewport;
 
     @Override
     public void create() {
+
+        // TODO: Initialize the ShapeRenderer and ExtendViewport
         renderer = new ShapeRenderer();
-        timeCreated = TimeUtils.millis();
+        viewport = new ExtendViewport(WORLD_WIDTH, WORLD_HEIGHT);
 
-        // TODO: Initialize the camera
-        camera = new OrthographicCamera();
-
-
-        // TODO: Set the camera's position to the center of the circle's movement (X_CENTER, Y_CENTER)
-        camera.position.set(X_CENTER, Y_CENTER, 0);
 
     }
 
     @Override
     public void dispose() {
+
+        // TODO: Dispose of the ShapeRenderer
         renderer.dispose();
     }
 
     @Override
     public void resize(int width, int height) {
 
-        // TODO: Calculate the aspect ratio (width / height)
-        float aspectRatio = 1.0f * width / height;
+        // TODO: Update the viewport
+        viewport.update(width, height, true);
 
-
-        // TODO: Set the camera's viewport height taking into account the ball's movement and radius
-
-        camera.viewportHeight = 2 * (Y_AMPLITUDE + BALL_RADIUS);
-
-
-        // TODO: Set the camera's viewport width to maintain the aspect ratio
-        camera.viewportWidth = aspectRatio * camera.viewportHeight;
-
+        // TODO: Move the viewport's camera to the center of the face
+        viewport.getCamera().position.set(FACE_CENTER_X, FACE_CENTER_Y, 0);
     }
 
+    /**
+     * We'll often want to break up our drawing into separate functions, or different objects
+     * entirely. This is easy to do, all we need to do is pass in our ShapeRenderer.
+     */
     @Override
     public void render() {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        // TODO: Call update() on the camera
-        camera.update();
+        // TODO: Apply the viewport
+        viewport.apply();
 
+        // TODO: Set the ShapeRender's projection matrix
+        renderer.setProjectionMatrix(viewport.getCamera().combined);
 
-        // TODO: Set the SceneRenderer's projection matrix equal to the camera's combined matrix
-        renderer.setProjectionMatrix(camera.combined);
+        // TODO: Start a Filled batch
+        renderer.begin(ShapeRenderer.ShapeType.Filled);
 
+        // TODO: Call drawSmileyFace()
+        drawSmileyFace(renderer);
 
-        renderer.begin(ShapeType.Filled);
-        float interval = TimeUtils.timeSinceMillis(timeCreated);
-        float x = X_CENTER + X_AMPLITUDE * MathUtils.sin(MathUtils.PI2 * interval /PERIOD);
-        float y = Y_CENTER + Y_AMPLITUDE * MathUtils.sin(2* MathUtils.PI2 * interval / PERIOD);
-        renderer.circle(x, y, BALL_RADIUS);
+        // TODO: End the batch
         renderer.end();
+
+    }
+
+    private void drawSmileyFace(ShapeRenderer renderer) {
+
+        // TODO: Set the color to yellow, and draw the face
+        renderer.setColor(Color.YELLOW);
+        renderer.circle(FACE_CENTER_X, FACE_CENTER_Y, FACE_RADIUS, FACE_SEGMENTS);
+
+        // TODO: Set the color to black and draw the eyes
+        renderer.setColor(Color.BLACK);
+        renderer.circle(FACE_CENTER_X - EYE_OFFSET, FACE_CENTER_Y + EYE_OFFSET, EYE_RADIUS, EYE_SEGMENTS);
+        renderer.circle(FACE_CENTER_X + EYE_OFFSET, FACE_CENTER_Y + EYE_OFFSET, EYE_RADIUS, EYE_SEGMENTS);
+
+        // TODO: Draw a black arc for the mouth (Hint: MOUTH_OUTER_RADIUS)
+        renderer.arc(FACE_CENTER_X, FACE_CENTER_Y, MOUTH_OUTER_RADIUS, MOUTH_START_ANGLE, MOUTH_DEGREES, MOUTH_SEGMENTS);
+
+        // TODO: Draw a yellow arc to make the mouth actually look like a mouth (Hint: MOUTH_INNER_RADIUS)
+        renderer.setColor(Color.YELLOW);
+        renderer.arc(FACE_CENTER_X, FACE_CENTER_Y, MOUTH_INNER_RADIUS, MOUTH_START_ANGLE, MOUTH_DEGREES, MOUTH_SEGMENTS);
+
+
     }
 }
