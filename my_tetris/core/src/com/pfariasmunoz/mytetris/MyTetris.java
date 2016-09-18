@@ -2,39 +2,69 @@ package com.pfariasmunoz.mytetris;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.utils.TimeUtils;
+
 
 /**
- * TODO: Start here!
+ * TODO: Start here
  *
- * Everything in this class should seem pretty familiar. We're just creating a ShapeRenderer, and
- * asking it to draw us some shapes. The interesting new things are, one, drawing circles and arcs
- * (partial circles), and two, using multiple ShapeRenderer batches!
- *
- * Circles can be drawn using either ShapeType.Filled, or ShapeType.Line. The former draws a solid
- * circle, the latter draws just the outline of the circle.
- *
- * If we want to draw both filled and outlined circles in the same frame, we need to use two
- * different batches. We just start one batch with ShapeType.Filled, draw our shapes, and end the
- * batch. Then we start another batch, this time with ShapeType.Line, draw again, and again,
- * remember to end the batch.
- *
- * Circles have a dirty little secret though. They're not really circles. They're a fan of
- * triangles, where all the triangles have their points at the center of the circle. ShapeRenderer
- * will pick how many triangles to use so the circle looks smooth, but if you make super small
- * circles, it might choose to use too few. You can use the optional last parameter to bump up the
- * number of segments.
+ * In this exercise, you'll create an OrthographicCamera, and use it to zoom in on a moving circle
  */
-
 public class MyTetris extends ApplicationAdapter {
+
+    private static final float BALL_RADIUS = 20;
+    private static final float PERIOD = 2000;
+    private static final float X_AMPLITUDE = 40;
+    private static final float Y_AMPLITUDE = 20;
+    private static final float X_CENTER = 100;
+    private static final float Y_CENTER = 100;
+
     ShapeRenderer renderer;
+    long timeCreated;
+
+    //TODO: Declare an OrthographicCamera
+    OrthographicCamera camera;
+
 
     @Override
     public void create() {
         renderer = new ShapeRenderer();
+        timeCreated = TimeUtils.millis();
+
+        // TODO: Initialize the camera
+        camera = new OrthographicCamera();
+
+
+        // TODO: Set the camera's position to the center of the circle's movement (X_CENTER, Y_CENTER)
+        camera.position.set(X_CENTER, Y_CENTER, 0);
+
+    }
+
+    @Override
+    public void dispose() {
+        renderer.dispose();
+    }
+
+    @Override
+    public void resize(int width, int height) {
+
+        // TODO: Calculate the aspect ratio (width / height)
+        float aspectRatio = 1.0f * width / height;
+
+
+        // TODO: Set the camera's viewport height taking into account the ball's movement and radius
+
+        camera.viewportHeight = 2 * (Y_AMPLITUDE + BALL_RADIUS);
+
+
+        // TODO: Set the camera's viewport width to maintain the aspect ratio
+        camera.viewportWidth = aspectRatio * camera.viewportHeight;
+
     }
 
     @Override
@@ -42,42 +72,19 @@ public class MyTetris extends ApplicationAdapter {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
+        // TODO: Call update() on the camera
+        camera.update();
+
+
+        // TODO: Set the SceneRenderer's projection matrix equal to the camera's combined matrix
+        renderer.setProjectionMatrix(camera.combined);
+
+
         renderer.begin(ShapeType.Filled);
-
-        // The most basic circle you can draw, with the segment count set for you
-        renderer.setColor(Color.WHITE);
-        renderer.circle(100, 100, 90);
-
-        // We can also draw partial circle, or arc
-        renderer.setColor(Color.YELLOW);
-        renderer.arc(300, 100, 90, 45, 270);
-
-        // What happens when we set the segments count too low
-        renderer.setColor(Color.BLUE);
-        renderer.circle(500, 100, 90, 10);
-        renderer.end();
-
-        // Circles can be drawn in either Filled or Line mode!
-        renderer.begin(ShapeType.Line);
-        renderer.setColor(Color.GREEN);
-        renderer.circle(100, 300, 90);
-
-        // Let's draw target rings
-        renderer.setColor(Color.ORANGE);
-        for (int radius = 80; radius > 0; radius -= 10) {
-            renderer.circle(100, 300, radius);
-        }
-
-        // We can also draw the outline of an arc
-        renderer.setColor(Color.BROWN);
-        renderer.arc(300, 300, 90, 0, 90);
-
-        // Let's draw some a funky snail shell
-        renderer.setColor(Color.CHARTREUSE);
-        final int arcs = 20;
-        for (int i = 1; i < arcs; i++) {
-            renderer.arc(300, 300, (1 - 1.0f * i / arcs) * 90, 360.0f * i / arcs, 90);
-        }
+        float interval = TimeUtils.timeSinceMillis(timeCreated);
+        float x = X_CENTER + X_AMPLITUDE * MathUtils.sin(MathUtils.PI2 * interval /PERIOD);
+        float y = Y_CENTER + Y_AMPLITUDE * MathUtils.sin(2* MathUtils.PI2 * interval / PERIOD);
+        renderer.circle(x, y, BALL_RADIUS);
         renderer.end();
     }
 }

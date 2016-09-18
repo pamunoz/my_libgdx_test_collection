@@ -1,5 +1,7 @@
 package com.pfariasmunoz.mytetris;
 
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 
 
@@ -9,6 +11,8 @@ import java.util.LinkedList;
 
 
 public class DragonCurveGenerator {
+    public static Color color;
+
     enum Direction {
         LEFT,
         RIGHT;
@@ -40,6 +44,7 @@ public class DragonCurveGenerator {
 
 
 
+
             // TODO: Add a left turn to turns
             turns.add(Direction.LEFT);
 
@@ -48,12 +53,15 @@ public class DragonCurveGenerator {
                 switch (turn) {
                     case LEFT:
                         turns.add(Direction.RIGHT);
+                        color = new Color(MathUtils.random(0, 256), MathUtils.random(0, 256), MathUtils.random(0, 256), 1);
                         break;
                     case RIGHT:
                         turns.add(Direction.LEFT);
+                        color = new Color(MathUtils.random(0, 256), MathUtils.random(0, 256), MathUtils.random(0, 256), 1);
                 }
             }
         }
+
         return turns;
     }
 
