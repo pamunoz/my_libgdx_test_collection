@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -31,8 +32,26 @@ public class GFS extends ApplicationAdapter implements InputProcessor {
     float scale = 1f;
     Sound fartSound;
 
+    Music song1;
+    Music song2;
+
 	@Override
 	public void create () {
+        // Add music
+        song1 = Gdx.audio.newMusic(Gdx.files.internal("some_music.mp3"));
+        song2 = Gdx.audio.newMusic(Gdx.files.internal("clutch.mp3"));
+
+        // playing the songs
+        // there is no instances
+        // no multiple intances of music
+        song1.play();
+        // when song1 finish we start song2
+        song1.setOnCompletionListener(new Music.OnCompletionListener() {
+            @Override
+            public void onCompletion(Music music) {
+                song2.play();
+            }
+        });
 
         // testing sound
         fartSound = Gdx.audio.newSound(Gdx.files.internal("fart.ogg"));
@@ -48,7 +67,7 @@ public class GFS extends ApplicationAdapter implements InputProcessor {
                 fartSound.pause(ourSoundId); // pause one instance
                 fartSound.pause(); // pause all instances of pause
             }
-        }, 10);
+        }, 2);
 
 
         xPos = Gdx.graphics.getWidth();
@@ -113,6 +132,9 @@ public class GFS extends ApplicationAdapter implements InputProcessor {
 	public void dispose () {
 		batch.dispose();
 		img.dispose();
+        song1.dispose();
+        song2.dispose();
+        fartSound.dispose();
 	}
 
     //=====Add Event driven inputs ===

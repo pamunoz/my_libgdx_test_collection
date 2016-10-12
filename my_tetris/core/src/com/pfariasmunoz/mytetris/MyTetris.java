@@ -99,8 +99,8 @@ public class MyTetris extends ApplicationAdapter {
 
         // TODO: Set the color to black and draw the eyes
         renderer.setColor(Color.BLACK);
-        renderer.circle(FACE_CENTER_X - EYE_OFFSET, FACE_CENTER_Y + EYE_OFFSET, EYE_RADIUS, EYE_SEGMENTS);
-        renderer.circle(FACE_CENTER_X + EYE_OFFSET, FACE_CENTER_Y + EYE_OFFSET, EYE_RADIUS, EYE_SEGMENTS);
+        renderer.circle(FACE_CENTER_X - EYE_OFFSET/2, FACE_CENTER_Y + EYE_OFFSET, EYE_RADIUS, EYE_SEGMENTS);
+        renderer.circle(FACE_CENTER_X + EYE_OFFSET/2, FACE_CENTER_Y + EYE_OFFSET, EYE_RADIUS, EYE_SEGMENTS);
 
         // TODO: Draw a black arc for the mouth (Hint: MOUTH_OUTER_RADIUS)
         renderer.arc(FACE_CENTER_X, FACE_CENTER_Y, MOUTH_OUTER_RADIUS, MOUTH_START_ANGLE, MOUTH_DEGREES, MOUTH_SEGMENTS);

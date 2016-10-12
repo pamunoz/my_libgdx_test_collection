@@ -28,9 +28,16 @@ public class GameScreen implements Screen {
     Array<Rectangle> raindrops;
     long lastDropTime;
     int dropsGathered;
+    int rainSpeed;
+    int bucketSpeed;
+    int dropSize;
 
     public GameScreen(final DropTwo game) {
         this.game = game;
+
+        // speed of objects
+        rainSpeed = 200;
+        bucketSpeed = 300;
 
         // load the images for the droplet and the bucket, 64x64 pixels each
         dropImage = new Texture(Gdx.files.internal("droplet.png"));
@@ -56,14 +63,16 @@ public class GameScreen implements Screen {
         // create the raindrops array and spawn the first raindrop
         raindrops = new Array<Rectangle>();
         spawnRaindrop();
+
     }
 
     private void spawnRaindrop() {
         Rectangle raindrop = new Rectangle();
         raindrop.x = MathUtils.random(0, 800 - 64);
         raindrop.y = 480;
-        raindrop.width = 64;
-        raindrop.height = 64;
+        dropSize = 64;
+        raindrop.width = dropSize;
+        raindrop.height = dropSize;
         raindrops.add(raindrop);
         lastDropTime = TimeUtils.nanoTime();
     }
@@ -110,11 +119,11 @@ public class GameScreen implements Screen {
         }
 
         if (Gdx.input.isKeyPressed(Keys.LEFT)) {
-            bucket.x -= 200 * Gdx.graphics.getDeltaTime();
+            bucket.x -= bucketSpeed * Gdx.graphics.getDeltaTime();
         }
 
         if (Gdx.input.isKeyPressed(Keys.RIGHT)) {
-            bucket.x += 200 * Gdx.graphics.getDeltaTime();
+            bucket.x += bucketSpeed * Gdx.graphics.getDeltaTime();
         }
 
         // make sure the bucket stays within the screen bounds
@@ -131,13 +140,19 @@ public class GameScreen implements Screen {
         while (iterator.hasNext()) {
             Rectangle raindrop = iterator.next();
             raindrop.y -= 200 * Gdx.graphics.getDeltaTime();
+            if (dropsGathered % 20 == 0 && dropsGathered > 20) rainSpeed *= 1.30f;
+
             if (raindrop.y + 64 < 0) iterator.remove();
             if (raindrop.overlaps(bucket)) {
                 dropsGathered++;
                 dropSound.play();
                 iterator.remove();
+
+
             }
         }
+
+
     }
 
 
