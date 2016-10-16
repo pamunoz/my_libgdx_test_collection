@@ -6,32 +6,43 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.TimeUtils;
+import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
 /**
- * TODO: Start here
+ * TODO: Start Here
  *
- * Your challenge, should you choose to accept it, is to draw a Serpinski Triangle. I offer no hints
- * beyond the fact that ShapeRenderer has a very convenient triangle() function, and that using a
- * FitViewport can simplify matters considerably. Good luck!
+ * In this exercise we'll make a circle move back and forth smoothly. We'll pick a period and and
+ * amplitude, the set the circle x position to the center of the screen plus the amplitude times the
+ * sin of 2Pi the elapsed time divided by the period.
  */
 
 public class MyGdxGame extends ApplicationAdapter {
-	static final float SIZE = 10;
-	private static final int RECURSIONS = 1;
+
+	private static final float WORLD_SIZE = 480;
+	private static final float CIRCLE_RADIUS = WORLD_SIZE / 20;
+	private static final float MOVEMENT_DISTANCE = WORLD_SIZE / 4;
+
+	// TODO: Define a constant that fixes how long a cycle of the animation should take in seconds
+	private static final float PERIOD = 1.0f;
+
+
 	ShapeRenderer renderer;
-	FitViewport viewport;
+	ExtendViewport viewport;
+
+	// TODO: Create a long to hold onto ApplicationAdapter creation time
+	private long initialTime;
+
 
 	@Override
 	public void create() {
 		renderer = new ShapeRenderer();
-		viewport = new FitViewport(SIZE, SIZE);
-	}
+		viewport = new ExtendViewport(WORLD_SIZE, WORLD_SIZE);
 
-	@Override
-	public void dispose() {
-		renderer.dispose();
+		// TODO: Save current value of TimeUtils.nanoTime()
+		initialTime = TimeUtils.nanoTime();
+
 	}
 
 	@Override
@@ -40,40 +51,43 @@ public class MyGdxGame extends ApplicationAdapter {
 	}
 
 	@Override
+	public void dispose() {
+		renderer.dispose();
+	}
+
+	@Override
 	public void render() {
+		viewport.apply();
+
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-		viewport.apply();
+
 		renderer.setProjectionMatrix(viewport.getCamera().combined);
 		renderer.begin(ShapeType.Filled);
-		inscribeSierpinskiTriangle(renderer, SIZE, RECURSIONS);
+
+		// Since we're using an extend viewport, the world might be bigger than we expect
+		float worldCenterX = viewport.getWorldWidth() / 2;
+		float worldCenterY = viewport.getWorldHeight() / 2;
+
+		// TODO: Figure out how long it's been since the animation started using TimeUtils.nanoTime()
+		float elapsedNanoseconds = TimeUtils.nanoTime() - initialTime;
+
+		// TODO: Use MathUtils.nanoToSec to figure out how many seconds the animation has been running
+		float elapsedSeconds = MathUtils.nanoToSec * elapsedNanoseconds;
+
+		// TODO: Figure out how many cycles have elapsed since the animation started running
+		float elapsedPeriods = elapsedSeconds / PERIOD;
+
+		// TODO: Figure out where in the cycle we are
+		float cyclePosition = elapsedPeriods % 1;
+
+		// TODO: Use MathUtils.sin() to set the x position of the circle
+
+
+		float x = worldCenterX + MOVEMENT_DISTANCE * MathUtils.sin(MathUtils.PI2 * cyclePosition);
+		float y = worldCenterY;
+		renderer.circle(x, y, CIRCLE_RADIUS);
 		renderer.end();
-	}
-
-	private void inscribeSierpinskiTriangle(ShapeRenderer shapeRenderer, float size, int recursions) {
-		Vector2 corner1 = new Vector2(0, 0);
-		Vector2 corner2 = new Vector2(size, 0);
-		Vector2 corner3 = new Vector2(size / 2, size * MathUtils.sin(MathUtils.PI/3f));
-		drawSierpinskiTriangle(shapeRenderer, corner1, corner2, corner3, recursions);
-	}
-
-	private void drawSierpinskiTriangle(ShapeRenderer shapeRenderer, Vector2 corner1, Vector2 corner2, Vector2 corner3, int recursions) {
-
-		Vector2 midpoint12 = new Vector2((corner1.x + corner2.x) / 2, (corner1.y + corner2.y) / 2);
-		Vector2 midpoint23 = new Vector2((corner2.x + corner3.x) / 2, (corner2.y + corner3.y) / 2);
-		Vector2 midpoint31 = new Vector2((corner3.x + corner1.x) / 2, (corner3.y + corner1.y) / 2);
-
-		if (recursions == 1) {
-			shapeRenderer.triangle(corner1.x, corner1.y, midpoint12.x, midpoint12.y, midpoint31.x, midpoint31.y);
-			shapeRenderer.triangle(corner2.x, corner2.y, midpoint23.x, midpoint23.y, midpoint12.x, midpoint12.y);
-			shapeRenderer.triangle(corner3.x, corner3.y, midpoint31.x, midpoint31.y, midpoint23.x, midpoint23.y);
-		} else {
-			drawSierpinskiTriangle(shapeRenderer, corner1, midpoint12, midpoint31, recursions - 1);
-			drawSierpinskiTriangle(shapeRenderer, corner2, midpoint23, midpoint12, recursions - 1);
-			drawSierpinskiTriangle(shapeRenderer, corner3, midpoint31, midpoint23, recursions - 1);
-		}
 
 	}
-
-
 }
