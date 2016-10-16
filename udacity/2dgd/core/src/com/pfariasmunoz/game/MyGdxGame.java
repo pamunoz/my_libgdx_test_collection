@@ -7,52 +7,59 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.TimeUtils;
-import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
 /**
- * TODO: Start Here
+ * TODO: Start here
  *
- * In this exercise we'll make a circle move back and forth smoothly. We'll pick a period and and
- * amplitude, the set the circle x position to the center of the screen plus the amplitude times the
- * sin of 2Pi the elapsed time divided by the period.
+ * In this demo, we'll explore how to create basic motion. Really all we need to know how to do is
+ * find out how much time has passed since we started rendering the scene. And then figure out what
+ * our scene should look like after that much time has passed.
+ *
+ * To accomplish the first task, LibGDX provides a great TimeUtils class, which has two methods of
+ * interest. TimeUtils.millis() returns the number of milliseconds (thousandths of a second) that
+ * have passed since January 1, 1970 UTC. This is great if you want to know the wall-clock time, but
+ * individual milliseconds start to matter when games are rendered at 60 frames per second.
+ *
+ * If we want more precision when comparing times (which we generally do), we can use
+ * TimeUtils.nanoTime(), which will give the number of nanoseconds (billionths of a second), since
+ * (or until) some arbitrary reference time. Again, you can't tell the wall-clock time using
+ * nanoTime. You can only tell time intervals, which is usually all we want.
  */
 
 public class MyGdxGame extends ApplicationAdapter {
 
-	private static final float WORLD_SIZE = 480;
+	public static final String TAG = MyGdxGame.class.getName();
+	private static final float WORLD_SIZE = 480.0f;
 	private static final float CIRCLE_RADIUS = WORLD_SIZE / 20;
-	private static final float MOVEMENT_DISTANCE = WORLD_SIZE / 4;
+	private static final float MOVEMENT_RADIUS = WORLD_SIZE / 4;
 
-	// TODO: Define a constant that fixes how long a cycle of the animation should take in seconds
+	// How many seconds until the circular motion repeats
 	private static final float PERIOD = 1.0f;
 
+	private ShapeRenderer renderer;
+	private FitViewport viewport;
 
-	ShapeRenderer renderer;
-	ExtendViewport viewport;
-
-	// TODO: Create a long to hold onto ApplicationAdapter creation time
+	// We set up a variable to hold the nanoTime at which the application was created.
 	private long initialTime;
-
 
 	@Override
 	public void create() {
 		renderer = new ShapeRenderer();
-		viewport = new ExtendViewport(WORLD_SIZE, WORLD_SIZE);
+		viewport = new FitViewport(WORLD_SIZE, WORLD_SIZE);
 
-		// TODO: Save current value of TimeUtils.nanoTime()
+		// Set the initialTime
 		initialTime = TimeUtils.nanoTime();
-
-	}
-
-	@Override
-	public void resize(int width, int height) {
-		viewport.update(width, height, true);
 	}
 
 	@Override
 	public void dispose() {
 		renderer.dispose();
+	}
+
+	@Override
+	public void resize(int width, int height) {
+		viewport.update(width, height, true);
 	}
 
 	@Override
@@ -65,29 +72,30 @@ public class MyGdxGame extends ApplicationAdapter {
 		renderer.setProjectionMatrix(viewport.getCamera().combined);
 		renderer.begin(ShapeType.Filled);
 
-		// Since we're using an extend viewport, the world might be bigger than we expect
-		float worldCenterX = viewport.getWorldWidth() / 2;
-		float worldCenterY = viewport.getWorldHeight() / 2;
-
-		// TODO: Figure out how long it's been since the animation started using TimeUtils.nanoTime()
 		float elapsedNanoseconds = TimeUtils.nanoTime() - initialTime;
-
-		// TODO: Use MathUtils.nanoToSec to figure out how many seconds the animation has been running
 		float elapsedSeconds = MathUtils.nanoToSec * elapsedNanoseconds;
-
-		// TODO: Figure out how many cycles have elapsed since the animation started running
 		float elapsedPeriods = elapsedSeconds / PERIOD;
-
-		// TODO: Figure out where in the cycle we are
 		float cyclePosition = elapsedPeriods % 1;
 
-		// TODO: Use MathUtils.sin() to set the x position of the circle
+		float x = WORLD_SIZE / 2 + MOVEMENT_RADIUS * MathUtils.cos(MathUtils.PI2 * cyclePosition);
+		float y = WORLD_SIZE / 2 + MOVEMENT_RADIUS * MathUtils.sin(MathUtils.PI2 * cyclePosition);
 
-
-		float x = worldCenterX + MOVEMENT_DISTANCE * MathUtils.sin(MathUtils.PI2 * cyclePosition);
-		float y = worldCenterY;
 		renderer.circle(x, y, CIRCLE_RADIUS);
-		renderer.end();
 
+		// Uncomment the next line to see the sort of beautiful things you can create with simple movement
+         drawFancyCircles(renderer, elapsedPeriods, 20);
+		renderer.end();
+	}
+
+	private void drawFancyCircles(ShapeRenderer renderer, float elapsedPeriods, int circleCount) {
+		for (int i = 1; i <= circleCount; i++) {
+			float centerX = WORLD_SIZE / 2 + WORLD_SIZE / 4 * MathUtils.cos(MathUtils.PI2 * i / circleCount);
+			float centerY = WORLD_SIZE / 2 + WORLD_SIZE / 4 * MathUtils.sin(MathUtils.PI2 * i / circleCount);
+
+			float x = centerX + WORLD_SIZE / 5 * MathUtils.cos(MathUtils.PI2 * (elapsedPeriods * i / circleCount));
+			float y = centerY + WORLD_SIZE / 5 * MathUtils.sin(MathUtils.PI2 * (elapsedPeriods * i / circleCount));
+
+			renderer.circle(x, y, 10);
+		}
 	}
 }
