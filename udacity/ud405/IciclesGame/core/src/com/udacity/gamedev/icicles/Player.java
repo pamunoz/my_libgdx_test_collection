@@ -2,6 +2,7 @@ package com.udacity.gamedev.icicles;
 
 // Set up Player
 
+import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -37,12 +38,20 @@ public class Player {
     }
 
     public void update(float delta) {
-        if (Gdx.input.isKeyPressed(Keys.LEFT)) {
-            position.x -= speed;
+        if (Gdx.input.isKeyPressed(Keys.LEFT) || Gdx.input.isKeyPressed(Keys.A)) {
+            position.x -= delta * speed;
         }
 
-        if (Gdx.input.isKeyPressed(Keys.RIGHT)) {
-            position.x += speed;
+        if (Gdx.input.isKeyPressed(Keys.RIGHT) || Gdx.input.isKeyPressed(Keys.D)) {
+            position.x += delta * speed;
+        }
+
+        if (Gdx.app.getType() == Application.ApplicationType.Android) {
+            // TODO: Compute accelerometer input = raw input / (gravity * sensitivity)
+            float accelerometerInput = -Gdx.input.getAccelerometerY() / (Constants.ACCELEROMETER_SENSITIVITY * Constants.ACCELERATION_OF_GRAVITY);
+
+            // TODO: Use the accelerometer input to move the player
+            position.x += -delta * accelerometerInput * speed;
         }
         ensureInBounds();
     }
@@ -91,7 +100,7 @@ public class Player {
         }
 
         if (position.x < 0 + Constants.PLAYER_HEAD_RADIUS) {
-            position.x = 0 + Constants.PLAYER_HEAD_RADIUS;
+            position.x = Constants.PLAYER_HEAD_RADIUS;
         }
     }
 

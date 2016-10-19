@@ -26,7 +26,13 @@ public class Constants {
     public static final Color PLAYER_COLOR = Color.BLACK;
 
     // player movement speed
-    public static final float PLAYER_SPEED = 0.05f;
+    public static final float PLAYER_SPEED = 10.0f;
+
+    // Accelerometer sensitivity
+    public static final float ACCELEROMETER_SENSITIVITY = 0.5f;
+
+    // acceleration due to gravity (9.8)
+    public static final float ACCELERATION_OF_GRAVITY = 9.8f;
 
     // constant for the height of the icicle
     public static final float ICICLE_HEIGHT = 1.0f;
