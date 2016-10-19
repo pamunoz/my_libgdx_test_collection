@@ -13,35 +13,40 @@ public class IciclesScreen implements Screen {
     public static final String TAG = IciclesScreen.class.getName();
 
 
-    // TODO: Add an ExtendViewport
+    // ExtendViewport
     ExtendViewport iciclesViewport;
 
-    // TODO: Add a ShapeRenderer
+    // ShapeRenderer
     ShapeRenderer renderer;
 
-    // TODO: Add an Icicle
+    // Icicle
     Icicle icicle;
+
+    Player player;
 
 
     @Override
     public void show() {
-        // TODO: Initialize the iciclesViewport using the world size constant
+        // Initialize the iciclesViewport using the world size constant
         iciclesViewport = new ExtendViewport(Constants.WORLD_SIZE, Constants.WORLD_SIZE);
 
-        // TODO: Initialize the ShapeRenderer
+        // Initialize the ShapeRenderer
         renderer = new ShapeRenderer();
 
-        // TODO: Set autoShapeType(true) on the ShapeRenderer
+        // Set autoShapeType(true) on the ShapeRenderer
         renderer.setAutoShapeType(true);
 
-        // TODO: Create a new Icicle in the middle of the world
+        // Icicle in the middle of the world
         icicle = new Icicle(new Vector2(Constants.WORLD_SIZE / 2, Constants.WORLD_SIZE / 2));
+
+        player = new Player(iciclesViewport);
     }
 
     @Override
     public void resize(int width, int height) {
-        // TODO: Ensure that the iciclesViewport updates correctly
+        // the iciclesViewport updates correctly
         iciclesViewport.update(width, height, true);
+        player.init();
 
     }
 
@@ -54,19 +59,22 @@ public class IciclesScreen implements Screen {
     @Override
     public void render(float delta) {
 
-        // TODO: Apply the iciclesViewport
+        player.update(delta);
+
+        // the iciclesViewport
         iciclesViewport.apply(true);
 
-        // TODO: Clear the screen to the background color
+        // screen to the background color
         Gdx.gl.glClearColor(Constants.BACKGROUND_COLOR.r, Constants.BACKGROUND_COLOR.g, Constants.BACKGROUND_COLOR.b, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        // TODO: Set the ShapeRenderer's projection matrix
+        // ShapeRenderer's projection matrix
         renderer.setProjectionMatrix(iciclesViewport.getCamera().combined);
 
-        // TODO: Draw the Icicle
+        // Draw the Icicle
         renderer.begin();
         icicle.render(renderer);
+        player.render(renderer);
         renderer.end();
     }
 
@@ -80,7 +88,7 @@ public class IciclesScreen implements Screen {
 
     }
 
-    // TODO: Dispose of the ShapeRenderer
+    // Dispose of the ShapeRenderer
     @Override
     public void hide() {
         renderer.dispose();
