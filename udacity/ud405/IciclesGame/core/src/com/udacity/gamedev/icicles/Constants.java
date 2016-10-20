@@ -1,6 +1,7 @@
 package com.udacity.gamedev.icicles;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.math.Vector2;
 
 public class Constants {
 
@@ -42,4 +43,10 @@ public class Constants {
 
     // constant for the color of the icicles
     public static final Color ICICLE_COLOR = Color.WHITE;
+
+    // TODO: Add constant for icicle acceleration
+    public static final Vector2 ICICLE_ACCELERATION = new Vector2(0, -5.0f);
+
+    // TODO: Add constant for icicle spawns per second
+    public static final float ICICLE_SPAWNS_PER_SECOND = 10.0f;
 }

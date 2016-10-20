@@ -8,12 +8,18 @@ public class Icicle {
 
     public static final String TAG = Icicle.class.getName();
 
-    // Vector2 position
     Vector2 position;
+    Vector2 velocity;
 
-    // constructor that sets the position
     public Icicle(Vector2 position) {
         this.position = position;
+        velocity = new Vector2();
+    }
+
+    public void update(float delta) {
+        // First scale a supplied vector, then add it to this vector
+        velocity.mulAdd(Constants.ICICLE_ACCELERATION, delta);
+        position.mulAdd(velocity, delta);
     }
 
     // render function that takes a ShapeRenderer

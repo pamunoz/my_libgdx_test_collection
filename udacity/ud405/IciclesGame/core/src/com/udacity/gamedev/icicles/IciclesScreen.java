@@ -23,6 +23,7 @@ public class IciclesScreen implements Screen {
     Icicle icicle;
 
     Player player;
+    Icicles icicles;
 
 
     @Override
@@ -40,6 +41,8 @@ public class IciclesScreen implements Screen {
         icicle = new Icicle(new Vector2(Constants.WORLD_SIZE / 2, Constants.WORLD_SIZE / 2));
 
         player = new Player(iciclesViewport);
+
+        icicles = new Icicles(iciclesViewport);
     }
 
     @Override
@@ -47,7 +50,7 @@ public class IciclesScreen implements Screen {
         // the iciclesViewport updates correctly
         iciclesViewport.update(width, height, true);
         player.init();
-
+        icicles.init();
     }
 
     @Override
@@ -58,6 +61,8 @@ public class IciclesScreen implements Screen {
 
     @Override
     public void render(float delta) {
+
+        icicles.update(delta);
 
         player.update(delta);
 
@@ -73,7 +78,8 @@ public class IciclesScreen implements Screen {
 
         // Draw the Icicle
         renderer.begin();
-        icicle.render(renderer);
+        //icicle.render(renderer);
+        icicles.render(renderer);
         player.render(renderer);
         renderer.end();
     }

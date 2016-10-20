@@ -47,10 +47,10 @@ public class Player {
         }
 
         if (Gdx.app.getType() == Application.ApplicationType.Android) {
-            // TODO: Compute accelerometer input = raw input / (gravity * sensitivity)
+            // accelerometer input = raw input / (gravity * sensitivity)
             float accelerometerInput = -Gdx.input.getAccelerometerY() / (Constants.ACCELEROMETER_SENSITIVITY * Constants.ACCELERATION_OF_GRAVITY);
 
-            // TODO: Use the accelerometer input to move the player
+            // Use the accelerometer input to move the player
             position.x += -delta * accelerometerInput * speed;
         }
         ensureInBounds();
