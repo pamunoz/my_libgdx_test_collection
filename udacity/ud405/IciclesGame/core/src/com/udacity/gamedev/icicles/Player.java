@@ -5,6 +5,7 @@ package com.udacity.gamedev.icicles;
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Vector2;
@@ -15,6 +16,8 @@ public class Player {
     public static final String TAG = Player.class.getName();
 
     private static float speed = Constants.PLAYER_SPEED;
+
+    Color color;
 
     // position (add constants to Constants.java first)
     Vector2 position;
@@ -34,10 +37,13 @@ public class Player {
 
     // Tfunction that moves the character to the bottom center of the screen
     public void init() {
+
         position = new Vector2(viewport.getWorldWidth() / 2, Constants.PLAYER_HEAD_HEIGHT);
     }
 
     public void update(float delta) {
+        color = Constants.PLAYER_COLOR;
+
         if (Gdx.input.isKeyPressed(Keys.LEFT) || Gdx.input.isKeyPressed(Keys.A)) {
             position.x -= delta * speed;
         }
@@ -104,4 +110,18 @@ public class Player {
         }
     }
 
+    public boolean hitByIcicle(Icicles icicles) {
+        boolean isHit = false;
+
+        for (Icicle icicle : icicles.icicles) {
+            if (icicle.position.dst(position) < Constants.PLAYER_HEAD_RADIUS) {
+                isHit = true;
+            }
+        }
+        return  isHit;
+    }
+
+    public void changeColor() {
+        color = Constants.PLAYER_HIT_COLOR;
+    }
 }

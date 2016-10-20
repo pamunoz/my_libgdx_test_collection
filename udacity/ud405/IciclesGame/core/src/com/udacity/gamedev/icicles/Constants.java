@@ -26,6 +26,9 @@ public class Constants {
     // constant for the player's color
     public static final Color PLAYER_COLOR = Color.BLACK;
 
+    // constant for the player's hit color
+    public static final Color PLAYER_HIT_COLOR = Color.RED;
+
     // player movement speed
     public static final float PLAYER_SPEED = 10.0f;
 

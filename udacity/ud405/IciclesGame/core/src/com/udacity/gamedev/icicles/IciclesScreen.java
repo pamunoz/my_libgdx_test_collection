@@ -63,6 +63,12 @@ public class IciclesScreen implements Screen {
 
         player.update(delta);
 
+        if (player.hitByIcicle(icicles)) {
+            player.changeColor();
+            icicles.init();
+        }
+
+
         // the iciclesViewport
         iciclesViewport.apply(true);
 
@@ -96,4 +102,6 @@ public class IciclesScreen implements Screen {
     public void hide() {
         renderer.dispose();
     }
+
+
 }
