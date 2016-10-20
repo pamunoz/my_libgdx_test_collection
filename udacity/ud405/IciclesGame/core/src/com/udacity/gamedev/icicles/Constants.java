@@ -47,9 +47,15 @@ public class Constants {
     // constant for the color of the icicles
     public static final Color ICICLE_COLOR = Color.WHITE;
 
-    // TODO: Add constant for icicle acceleration
+    // constant for icicle acceleration
     public static final Vector2 ICICLE_ACCELERATION = new Vector2(0, -5.0f);
 
-    // TODO: Add constant for icicle spawns per second
+    // constant for icicle spawns per second
     public static final float ICICLE_SPAWNS_PER_SECOND = 10.0f;
+
+    // Add screen reference size for scaling the HUD (480 works well)
+    public static final float SCREEN_REFERENCE_SIZE = 480.0f;
+
+    // Add constant for the margin between the HUD and screen edge
+    public static final float HUD_MARGIN = 20.0f;
 }

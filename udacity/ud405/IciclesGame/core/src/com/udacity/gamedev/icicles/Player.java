@@ -26,11 +26,18 @@ public class Player {
     // viewport
     Viewport viewport;
 
+    // TODO: Add counter for number of deaths
+    int numberOfDeaths;
+
 
     // constructor that accepts and sets the viewport, then calls init()
 
     public Player(Viewport viewport) {
         this.viewport = viewport;
+
+        // TODO: Set number of deaths to zero
+        numberOfDeaths = 0;
+
         init();
     }
 
@@ -113,11 +120,15 @@ public class Player {
     public boolean hitByIcicle(Icicles icicles) {
         boolean isHit = false;
 
-        for (Icicle icicle : icicles.icicles) {
+        for (Icicle icicle : icicles.icicleList) {
             if (icicle.position.dst(position) < Constants.PLAYER_HEAD_RADIUS) {
                 isHit = true;
             }
         }
+
+        // If the player was hit, increment death counter
+        if (isHit) numberOfDeaths++;
+
         return  isHit;
     }
 
