@@ -7,10 +7,14 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.DelayedRemovalArray;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.udacity.gamedev.icicles.Constants.Difficulty;
 
 public class Icicles {
 
     public static final String TAG = Icicles.class.getName();
+
+    // TODO: Add a Difficulty
+    Difficulty difficulty;
 
     // Add counter for how many icicles have been dodged
     int dodgedIcicles;
@@ -19,7 +23,10 @@ public class Icicles {
 
     Viewport viewport;
 
-    public Icicles(Viewport viewport) {
+    // TODO: Accept a difficulty in the constructor
+    public Icicles(Viewport viewport, Difficulty difficulty) {
+        // TODO: Set difficulty
+        this.difficulty = difficulty;
         this.viewport = viewport;
         init();
     }
@@ -31,7 +38,9 @@ public class Icicles {
     }
 
     public void update(float delta) {
-        if (MathUtils.random() < delta * Constants.ICICLE_SPAWNS_PER_SECOND) {
+        // TODO: Use the difficulty's spawn rate
+
+        if (MathUtils.random() < delta * difficulty.spawnRate) {
             Vector2 newIciclePosition = new Vector2(
                     MathUtils.random() * viewport.getWorldWidth(),
                     viewport.getWorldHeight() + Constants.ICICLE_HEIGHT);

@@ -7,16 +7,18 @@ import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.udacity.gamedev.icicles.Constants.Difficulty;
 
 
 public class IciclesScreen implements Screen {
 
     public static final String TAG = IciclesScreen.class.getName();
 
+    // TODO: Add Difficulty
+    Difficulty difficulty;
 
     // ExtendViewport
     ExtendViewport iciclesViewport;
@@ -24,22 +26,25 @@ public class IciclesScreen implements Screen {
     // ShapeRenderer
     ShapeRenderer renderer;
 
-    // TODO: Add ScreenViewport for HUD
+    // Add ScreenViewport for HUD
     ScreenViewport HUD;
 
-    // TODO: Add SpriteBatch
+    // Add SpriteBatch
     SpriteBatch batch;
 
-    // TODO: Add BitmapFont
+    // Add BitmapFont
     BitmapFont font;
 
     // Icicle
     Player player;
     Icicles icicles;
 
-    // TODO: Add int to hold the top score
+    // Add int to hold the top score
     int topScore;
 
+    public IciclesScreen(Difficulty difficulty) {
+        this.difficulty = difficulty;
+    }
 
     @Override
     public void show() {
@@ -52,24 +57,25 @@ public class IciclesScreen implements Screen {
         // Set autoShapeType(true) on the ShapeRenderer
         renderer.setAutoShapeType(true);
 
-        // TODO: Initialize the HUD viewport
+        // Initialize the HUD viewport
         HUD = new ScreenViewport();
 
-        // TODO: Initialize the SpriteBatch
+        // Initialize the SpriteBatch
         batch = new SpriteBatch();
 
-        // TODO: Initialize the BitmapFont
+        // Initialize the BitmapFont
         font = new BitmapFont();
 
-        // TODO: Give the font a linear TextureFilter
+        // Give the font a linear TextureFilter
         font.getRegion().getTexture().setFilter(TextureFilter.Linear, TextureFilter.Linear);
 
         // Icicle in the middle of the world
         player = new Player(iciclesViewport);
 
-        icicles = new Icicles(iciclesViewport);
+        // Initialize icicles with the difficulty
+        icicles = new Icicles(iciclesViewport, difficulty);
 
-        // TODO: Set top score to zero
+        // Set top score to zero
         topScore = 0;
     }
 
@@ -114,7 +120,10 @@ public class IciclesScreen implements Screen {
         iciclesViewport.apply(true);
 
         // screen to the background color
-        Gdx.gl.glClearColor(Constants.BACKGROUND_COLOR.r, Constants.BACKGROUND_COLOR.g, Constants.BACKGROUND_COLOR.b, 1);
+        Gdx.gl.glClearColor(
+                Constants.BACKGROUND_COLOR.r,
+                Constants.BACKGROUND_COLOR.g,
+                Constants.BACKGROUND_COLOR.b, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         // ShapeRenderer's projection matrix
@@ -127,29 +136,30 @@ public class IciclesScreen implements Screen {
         player.render(renderer);
         renderer.end();
 
-        // TODO: Set the top score to max(topScore, iciclesDodges)
+        // Set the top score to max(topScore, iciclesDodges)
         topScore = Math.max(topScore, icicles.dodgedIcicles);
 
-        // TODO: Apply the HUD viewport
+        // Apply the HUD viewport
         HUD.apply();
 
-        // TODO: Set the SpriteBatch's projection matrix
+        // Set the SpriteBatch's projection matrix
         batch.setProjectionMatrix(HUD.getCamera().combined);
 
-        // TODO: Begin the SpriteBatch
+        // Begin the SpriteBatch
         batch.begin();
 
-        // TODO: Draw the number of player deaths in the top left
+        // Show Difficulty level in the top left
+        // Draw the number of player deaths in the top left
 
-        font.draw(batch, "Deaths: " + player.numberOfDeaths,
+        font.draw(batch, "Deaths: " + player.numberOfDeaths + "\nDifficulty Lebel: " + difficulty.label,
                 Constants.HUD_MARGIN, HUD.getWorldHeight() - Constants.HUD_MARGIN);
 
-        // TODO: Draw the score and top score in the top right
+        // Draw the score and top score in the top right
         font.draw(batch, "Score: " + icicles.dodgedIcicles + "\nTop Score: " + topScore,
                 HUD.getWorldWidth() - Constants.HUD_MARGIN, HUD.getWorldHeight() - Constants.HUD_MARGIN,
                 0, Align.right, false);
 
-        // TODO: End the SpriteBatch
+        // End the SpriteBatch
         batch.end();
     }
 

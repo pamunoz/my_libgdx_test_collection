@@ -26,7 +26,7 @@ public class Player {
     // viewport
     Viewport viewport;
 
-    // TODO: Add counter for number of deaths
+    // Add counter for number of deaths
     int numberOfDeaths;
 
 
@@ -35,7 +35,7 @@ public class Player {
     public Player(Viewport viewport) {
         this.viewport = viewport;
 
-        // TODO: Set number of deaths to zero
+        // Set number of deaths to zero
         numberOfDeaths = 0;
 
         init();

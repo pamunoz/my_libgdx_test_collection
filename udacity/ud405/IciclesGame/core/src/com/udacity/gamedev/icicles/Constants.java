@@ -58,4 +58,30 @@ public class Constants {
 
     // Add constant for the margin between the HUD and screen edge
     public static final float HUD_MARGIN = 20.0f;
+
+    // TODO: Create constants for difficulty labels ("Cold", "Colder", "Coldest")
+    public static final String EASY_LABEL = "Cold";
+    public static final String NORMAL_LABEL = "Colder";
+    public static final String HARD_LABEL = "Coldest";
+
+    // TODO: Create constants for the icicle spawn rates for the various difficulties
+    public static final float EASY_SPAWN_RATE = 5.0f;
+    public static final float NORMAL_SPAWN_RATE = 10.0f;
+    public static final float HARD_SPAWN_RATE = 30.0f;
+
+    // TODO: Create Difficulty enum holding the spawn rate and label for each difficulty
+    public enum Difficulty {
+        EASY(EASY_SPAWN_RATE, EASY_LABEL),
+        NORMAL(NORMAL_SPAWN_RATE, NORMAL_LABEL),
+        HARD(HARD_SPAWN_RATE, HARD_LABEL);
+
+        float spawnRate;
+        String label;
+
+        Difficulty(float spawnRate, String label) {
+            this.spawnRate = spawnRate;
+            this.label = label;
+        }
+
+    }
 }
