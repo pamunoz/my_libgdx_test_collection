@@ -2,7 +2,7 @@ package com.udacity.gamedev.icicles;
 
 import com.badlogic.gdx.Game;
 
-import static com.udacity.gamedev.icicles.Constants.*;
+import static com.udacity.gamedev.icicles.Constants.Difficulty;
 
 
 public class IciclesGame extends Game {
@@ -10,6 +10,18 @@ public class IciclesGame extends Game {
 	// call setScreen() with a new IciclesScreen()
 	@Override
 	public void create() {
-		setScreen(new IciclesScreen(Difficulty.EASY));
+		showDifficultyScreen();
 	}
+
+	public void showDifficultyScreen() {
+		// TODO: Show the difficulty screen
+		setScreen(new DifficultyScreen(this));
+	}
+
+	public void showIciclesScreen(Difficulty difficulty) {
+		// TODO: Show the Icicles screen with the appropriate difficulty
+		setScreen(new IciclesScreen(this, difficulty));
+
+	}
+
 }

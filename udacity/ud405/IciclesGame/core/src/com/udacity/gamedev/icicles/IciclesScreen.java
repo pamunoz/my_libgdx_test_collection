@@ -1,6 +1,7 @@
 package com.udacity.gamedev.icicles;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
@@ -13,11 +14,14 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.udacity.gamedev.icicles.Constants.Difficulty;
 
 
-public class IciclesScreen implements Screen {
+public class IciclesScreen extends InputAdapter implements Screen {
 
     public static final String TAG = IciclesScreen.class.getName();
 
-    // TODO: Add Difficulty
+    // Add IciclesGame member variable
+    IciclesGame game;
+
+    // Add Difficulty
     Difficulty difficulty;
 
     // ExtendViewport
@@ -42,7 +46,10 @@ public class IciclesScreen implements Screen {
     // Add int to hold the top score
     int topScore;
 
-    public IciclesScreen(Difficulty difficulty) {
+    // Accept IciclesGame in the constructor
+    public IciclesScreen(IciclesGame game, Difficulty difficulty) {
+        // Save the IciclesGame
+        this.game = game;
         this.difficulty = difficulty;
     }
 
@@ -74,6 +81,9 @@ public class IciclesScreen implements Screen {
 
         // Initialize icicles with the difficulty
         icicles = new Icicles(iciclesViewport, difficulty);
+
+        // set this screen as inputProcessor
+        Gdx.input.setInputProcessor(this);
 
         // Set top score to zero
         topScore = 0;
@@ -179,5 +189,12 @@ public class IciclesScreen implements Screen {
         renderer.dispose();
     }
 
+    // Input
 
+    @Override
+    public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+        // TODO: Tell IciclesGame to show the difficulty screen
+        game.showDifficultyScreen();
+        return true;
+    }
 }
