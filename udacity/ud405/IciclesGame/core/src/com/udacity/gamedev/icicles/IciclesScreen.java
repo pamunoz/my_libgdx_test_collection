@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 
 
@@ -20,7 +19,6 @@ public class IciclesScreen implements Screen {
     ShapeRenderer renderer;
 
     // Icicle
-    Icicle icicle;
 
     Player player;
     Icicles icicles;
@@ -38,7 +36,6 @@ public class IciclesScreen implements Screen {
         renderer.setAutoShapeType(true);
 
         // Icicle in the middle of the world
-        icicle = new Icicle(new Vector2(Constants.WORLD_SIZE / 2, Constants.WORLD_SIZE / 2));
 
         player = new Player(iciclesViewport);
 
