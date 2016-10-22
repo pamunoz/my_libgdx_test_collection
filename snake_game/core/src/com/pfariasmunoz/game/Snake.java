@@ -17,6 +17,8 @@ public class Snake {
 
     Vector2 position;
 
+    Vector2 snakeSpeed;
+
     public int numberOfSegments;
 
     public Snake(Viewport viewport) {
@@ -27,6 +29,7 @@ public class Snake {
 
     public void init() {
         position = new Vector2(0, 0);
+        snakeSpeed = new Vector2(1, 0);
     }
 
     public void update(float delta) {
@@ -38,6 +41,7 @@ public class Snake {
 
         if (Gdx.input.isKeyPressed(Keys.UP)) {
             position.y += delta * Constants.SNAKE_MOVEMENT_SPEED;
+
         } else if (Gdx.input.isKeyPressed(Keys.DOWN)) {
             position.y -= delta * Constants.SNAKE_MOVEMENT_SPEED;
         }
@@ -74,5 +78,10 @@ public class Snake {
         renderer.set(ShapeType.Filled);
         renderer.rect(position.x, position.y,
                 Constants.SNAKE_SEGMENT_SIDE, Constants.SNAKE_SEGMENT_SIDE);
+    }
+
+    private void dir(float x, float y) {
+        snakeSpeed.x = x;
+        snakeSpeed.y = y;
     }
 }
