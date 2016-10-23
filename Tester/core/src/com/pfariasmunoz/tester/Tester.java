@@ -42,6 +42,9 @@ public class Tester extends ApplicationAdapter{
 
 	@Override
 	public void render () {
+		if (hasEaten()) {
+			pickLocation();
+		}
         if (timeElapsed % 1.0 == 0.0f) {
             seconds++;
         }
@@ -112,6 +115,15 @@ public class Tester extends ApplicationAdapter{
         foodPos = new Vector2(xFood, yFood);
         foodPos.scl(scl);
     }
+
+	public boolean hasEaten() {
+		if (position.dst(foodPos) < 1.0f) {
+			return true;
+		} else {
+			return false;
+		}
+
+	}
 
 
 }
