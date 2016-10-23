@@ -18,7 +18,7 @@ public class Tester extends ApplicationAdapter{
 	ShapeRenderer renderer;
 	Vector2 position, velocity, foodPos;
     float timeElapsed, scl, speed;
-    int seconds, xFood, yFood, timeDifficulty;
+    int seconds, xFood, yFood, timeDifficulty, columns, rows;
 	
 	@Override
 	public void create () {
@@ -42,6 +42,8 @@ public class Tester extends ApplicationAdapter{
 
 	@Override
 	public void render () {
+        columns = MathUtils.floor(Gdx.graphics.getWidth() / scl);
+        rows = MathUtils.floor(Gdx.graphics.getHeight() / scl);
 		if (hasEaten()) {
 			pickLocation();
 		}
@@ -61,6 +63,7 @@ public class Tester extends ApplicationAdapter{
         if (timeElapsed > (1.0f/speed)) {
             position.x += velocity.x;
             position.y += velocity.y;
+            ensureInBounds();
             timeElapsed = 0;
         }
 		renderer.begin(ShapeType.Filled);
@@ -122,8 +125,21 @@ public class Tester extends ApplicationAdapter{
 		} else {
 			return false;
 		}
-
 	}
 
+    public void ensureInBounds() {
+        // limit horizontal movement
+        if (position.x > columns * scl - scl) {
+            position.x = columns * scl - scl;
+        } else if (position.x < 0) {
+            position.x = 0;
+        }
+        // limit vertical movement
+        if (position.y > rows * scl - scl) {
+            position.y = rows * scl - scl;
+        } else if (position.y < 0) {
+            position.y = 0;
+        }
+    }
 
 }
