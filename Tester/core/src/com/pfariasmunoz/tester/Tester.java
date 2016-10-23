@@ -68,6 +68,16 @@ public class Tester extends ApplicationAdapter{
 		renderer.setColor(Color.GREEN);
 		renderer.rect(foodPos.x, foodPos.y, scl, scl);
 		renderer.end();
+
+		renderer.begin(ShapeType.Line);
+		renderer.setColor(Color.BLUE);
+		for (int i = 0; i < Gdx.graphics.getHeight(); i++) {
+			renderer.line(0, i * scl, Gdx.graphics.getWidth(), i * scl);
+		}
+		for (int i = 0; i < Gdx.graphics.getWidth(); i++) {
+			renderer.line(i * scl, 0, i * scl, Gdx.graphics.getHeight());
+		}
+		renderer.end();
 	}
 	
 	@Override
