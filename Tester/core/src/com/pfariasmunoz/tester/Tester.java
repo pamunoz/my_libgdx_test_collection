@@ -14,11 +14,8 @@ public class Tester extends ApplicationAdapter{
 	SpriteBatch batch;
 	Texture img;
 	ShapeRenderer renderer;
-	Vector2 position;
-    float timeElapsed;
-    float scl;
-    Vector2 velocity;
-    float speed;
+	Vector2 position, velocity;
+    float timeElapsed, scl, speed;
     int seconds;
 	
 	@Override
@@ -47,7 +44,7 @@ public class Tester extends ApplicationAdapter{
 		Gdx.gl.glClearColor(1, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         // TODO: change this function beecause is updating not every second
-        if (timeElapsed > (1.0f/speed)) {
+        if (timeElapsed > (1.0f)) {
 
             position.x += velocity.x;
             position.y += velocity.y;
@@ -83,7 +80,5 @@ public class Tester extends ApplicationAdapter{
 		}
 	}
 
-    public void moving() {
 
-    }
 }
