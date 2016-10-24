@@ -14,26 +14,23 @@ import com.badlogic.gdx.math.Vector2;
 
 public class Tester extends ApplicationAdapter{
 	SpriteBatch batch;
-	Texture img;
 	ShapeRenderer renderer;
 	Vector2 position, velocity, foodPos;
     float timeElapsed, scl, speed;
-    int seconds, xFood, yFood, timeDifficulty, columns, rows;
+    int seconds, xFood, yFood, columns, rows;
 	
 	@Override
 	public void create () {
 
-        timeDifficulty = 10;
-
-
         seconds = 0;
         scl = 15;
+        columns = MathUtils.floor(Gdx.graphics.getWidth() / scl);
+        rows = MathUtils.floor(Gdx.graphics.getHeight() / scl);
 		renderer = new ShapeRenderer();
         position = new Vector2(0, 0);
         velocity = new Vector2(scl, 0);
 
 		batch = new SpriteBatch();
-		img = new Texture("badlogic.jpg");
         timeElapsed = 0;
         speed = 1.0f;
         pickLocation();
@@ -42,18 +39,11 @@ public class Tester extends ApplicationAdapter{
 
 	@Override
 	public void render () {
-        columns = MathUtils.floor(Gdx.graphics.getWidth() / scl);
-        rows = MathUtils.floor(Gdx.graphics.getHeight() / scl);
+
 		if (hasEaten()) {
 			pickLocation();
 		}
-        if (timeElapsed % 1.0 == 0.0f) {
-            seconds++;
-        }
-        if (seconds > timeDifficulty) {
-            speed += 0.1;
-            seconds = 0;
-        }
+		updateDifficulty();
 
         myInput();
         timeElapsed += Gdx.graphics.getDeltaTime();
@@ -90,7 +80,6 @@ public class Tester extends ApplicationAdapter{
 	public void dispose () {
         renderer.dispose();
 		batch.dispose();
-		img.dispose();
 	}
 
 	public void turn(Vector2 vector) {
@@ -111,12 +100,24 @@ public class Tester extends ApplicationAdapter{
 	}
 
     public void pickLocation() {
-        int columns = Gdx.graphics.getWidth() / (int)scl;
-        int rows = Gdx.graphics.getHeight() / (int)scl;
+
         xFood = MathUtils.floor(MathUtils.random(columns));
         yFood = MathUtils.floor(MathUtils.random(rows));
         foodPos = new Vector2(xFood, yFood);
         foodPos.scl(scl);
+
+        if (foodPos.x > columns * scl - scl) {
+            pickLocation();
+        } else if (foodPos.x < 0) {
+            pickLocation();
+        }
+        // limit vertical movement
+        if (foodPos.y > rows * scl - scl) {
+            pickLocation();
+        } else if (foodPos.y < 0) {
+            pickLocation();
+        }
+
     }
 
 	public boolean hasEaten() {
@@ -141,5 +142,15 @@ public class Tester extends ApplicationAdapter{
             position.y = 0;
         }
     }
+
+	public void updateDifficulty() {
+		if (timeElapsed > 1) {
+			seconds++;
+		}
+		if (seconds > 10) {
+			speed += 0.3;
+			seconds = 0;
+		}
+	}
 
 }
