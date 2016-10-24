@@ -3,6 +3,7 @@ package com.pfariasmunoz.game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
@@ -14,55 +15,70 @@ public class GameScreen extends InputAdapter implements Screen {
 
     public static final String TAG = GameScreen.class.getName();
 
-    SnakeGame game;
-    ExtendViewport snakeViewport;
-    ShapeRenderer renderer;
+    private SnakeGame mGame;
+    private ExtendViewport mSnakeViewport;
+    private ShapeRenderer mRenderer;
 
-    Snake snake;
-    Vector2 pos;
+    private Snake mSnake;
+    private Food mFood;
+    private Vector2 mPosition;
 
-    int topScore;
+    private float mGridLength;
+
+    private int mSeconds;
 
     public GameScreen(SnakeGame game) {
-        this.game = game;
+        this.mGame = game;
     }
 
     @Override
     public void show() {
-        snakeViewport = new ExtendViewport(
+        mGame = new SnakeGame();
+        mSnakeViewport = new ExtendViewport(
                 Constants.GAME_WORLD_WIDTH,
                 Constants.GAME_WORLD_HEIGHT);
+        mRenderer = new ShapeRenderer();
+        mRenderer.setAutoShapeType(true);
 
-        renderer = new ShapeRenderer();
-        renderer.setAutoShapeType(true);
+        mGridLength = 15;
+        mSnake = new Snake(mSnakeViewport, mGridLength);
+        mFood = new Food(mSnakeViewport, mGridLength);
 
-        pos = new Vector2(0, 0);
-
-        snake = new Snake(snakeViewport);
 
         Gdx.input.setInputProcessor(this);
 
-        topScore = 0;
+        mSeconds = 0;
     }
 
     @Override
     public void resize(int width, int height) {
-        snakeViewport.update(width, height, true);
-        snake.init();
+        mSnakeViewport.update(width, height, true);
+        mSnake.init();
     }
 
     @Override
     public void render(float delta) {
-        snake.update(delta);
 
-        snakeViewport.apply(true);
+
+        mSnakeViewport.apply(true);
+        mSnake.update();
+        mSnake.move();
+
+        if (mSnake.hasEaten(mFood.getPosition())) {
+            mFood.resetPosition();
+        }
         Gdx.gl.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        renderer.setProjectionMatrix(snakeViewport.getCamera().combined);
-        renderer.begin(ShapeType.Filled);
-        snake.render(renderer);
-        renderer.end();
+        mRenderer.setProjectionMatrix(mSnakeViewport.getCamera().combined);
+        mRenderer.begin();
+        mRenderer.setColor(Color.BLUE);
+        mSnake.render(mRenderer);
+        mRenderer.setColor(Color.WHITE);
+        mFood.render(mRenderer);
+        mRenderer.setColor(Color.CHARTREUSE);
+        drawGridLines(mRenderer);
+        mRenderer.end();
 
     }
 
@@ -79,12 +95,23 @@ public class GameScreen extends InputAdapter implements Screen {
 
     @Override
     public void hide() {
-        renderer.dispose();
+        mRenderer.dispose();
     }
 
     @Override
     public void dispose() {
+        mRenderer.dispose();
 
+    }
+
+    private void drawGridLines(ShapeRenderer renderer) {
+        renderer.set(ShapeType.Line);
+        for (int i = 0; i < mSnakeViewport.getWorldHeight(); i++) {
+            renderer.line(0, i * mGridLength, mSnakeViewport.getWorldWidth(), i * mGridLength);
+        }
+        for (int i = 0; i < mSnakeViewport.getWorldWidth(); i++) {
+            renderer.line(i * mGridLength, 0, i * mGridLength, mSnakeViewport.getWorldHeight());
+        }
     }
 
 }

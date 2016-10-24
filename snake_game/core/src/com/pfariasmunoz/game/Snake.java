@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
@@ -13,60 +14,86 @@ public class Snake {
 
     public static final String TAG = Snake.class.getName();
 
-    Viewport viewport;
+    private Viewport mViewport;
+    private Vector2 mPosition;
+    Vector2 mVelocity;
 
-    Vector2 position;
+    private float mGridLength;
+    private int columns;
+    private int rows;
 
-    Vector2 snakeSpeed;
 
-    public int numberOfSegments;
-
-    public Snake(Viewport viewport) {
-        this.viewport = viewport;
-        numberOfSegments = 1;
+    public Snake(Viewport viewport, float gridLength) {
+        this.mViewport = viewport;
+        this.mGridLength = gridLength;
+        columns = MathUtils.floor(viewport.getWorldWidth() / gridLength);
+        rows = MathUtils.floor(viewport.getWorldHeight() / gridLength);
         init();
     }
 
     public void init() {
-        position = new Vector2(0, 0);
-        snakeSpeed = new Vector2(1, 0);
+        mPosition = new Vector2(0, 0);
+        mVelocity = new Vector2(mGridLength, 0);
     }
 
-    public void update(float delta) {
-        if (Gdx.input.isKeyPressed(Keys.LEFT)) {
-            position.x -= delta * Constants.SNAKE_MOVEMENT_SPEED;
-        } else if (Gdx.input.isKeyPressed(Keys.RIGHT)) {
-            position.x += delta * Constants.SNAKE_MOVEMENT_SPEED;
-        }
+    /**
+     * Makes the snake turn according to the direction
+     * @param direction the direction of turn.
+     */
+    private void turn(Vector2 direction) {
+        mVelocity.x = direction.x;
+        mVelocity.y = direction.y;
+    }
 
-        if (Gdx.input.isKeyPressed(Keys.UP)) {
-            position.y += delta * Constants.SNAKE_MOVEMENT_SPEED;
-
+    /**
+     * Update the direction of the snake according to the keys pressed
+     */
+    public void update() {
+        if (Gdx.input.isKeyPressed(Keys.RIGHT)) {
+            turn(new Vector2(mGridLength, 0));
+        } else if (Gdx.input.isKeyPressed(Keys.LEFT)) {
+            turn(new Vector2(-mGridLength, 0));
+        } else if (Gdx.input.isKeyPressed(Keys.UP)) {
+            turn(new Vector2(0, mGridLength));
         } else if (Gdx.input.isKeyPressed(Keys.DOWN)) {
-            position.y -= delta * Constants.SNAKE_MOVEMENT_SPEED;
+            turn(new Vector2(0, -mGridLength));
         }
-        // ensure the head of the snake is inside the screen
+    }
+
+    /**
+     * Move the snake with its velocity
+     */
+    public void move() {
+        mPosition.x += mVelocity.x;
+        mPosition.y += mVelocity.y;
         ensureInBounds();
     }
 
+    /**
+     * Limit the movement of the snake to the bounds of the screen
+     */
     private void ensureInBounds() {
-        // ensure the limits of the horizontal position
-        if (position.x < 0) {
-            position.x = 0;
-        } else if (position.x > viewport.getWorldWidth() - Constants.SNAKE_SEGMENT_SIDE) {
-            position.x = viewport.getWorldWidth() - Constants.SNAKE_SEGMENT_SIDE;
+        // limit the movement of the snake in the horizontal position
+        if (mPosition.x > columns * mGridLength - mGridLength) {
+            mPosition.x = columns * mGridLength - mGridLength;
+        } else if (mPosition.x < 0) {
+            mPosition.x = 0;
         }
-        // ensure the limits of the vertical position
-        if (position.y < 0) {
-            position.y = 0;
-        } else if (position.y > viewport.getWorldHeight() - Constants.SNAKE_SEGMENT_SIDE) {
-            position.y = viewport.getWorldHeight() - Constants.SNAKE_SEGMENT_SIDE;
+        // limits the movement of the snake in the vertical position
+        if (mPosition.y > rows * mGridLength - mGridLength) {
+            mPosition.y = rows * mGridLength - mGridLength;
+        } else if (mPosition.y < 0) {
+            mPosition.y = 0;
         }
-
     }
 
-    public boolean eat(Vector2 foodPosition) {
-        if (position.dst(foodPosition) > Constants.SNAKE_SEGMENT_SIDE / 3) {
+    /**
+     * answers if the snake has eaten the food
+      * @param foodPosition the position on the grid of the food
+     * @return the answer if the snake has eaten.
+     */
+    public boolean hasEaten(Vector2 foodPosition) {
+        if (mPosition.dst(foodPosition) < mGridLength / 2.0f) {
             return true;
         } else {
             return false;
@@ -74,14 +101,42 @@ public class Snake {
     }
 
     public void render(ShapeRenderer renderer) {
-        renderer.setColor(Color.WHITE);
         renderer.set(ShapeType.Filled);
-        renderer.rect(position.x, position.y,
-                Constants.SNAKE_SEGMENT_SIDE, Constants.SNAKE_SEGMENT_SIDE);
+        renderer.rect(mPosition.x, mPosition.y, mGridLength, mGridLength);
     }
 
-    private void dir(float x, float y) {
-        snakeSpeed.x = x;
-        snakeSpeed.y = y;
+
+    // ========== Getters and Setters ==============
+
+    public Viewport getmViewport() {
+        return mViewport;
+    }
+
+    public void setmViewport(Viewport mViewport) {
+        this.mViewport = mViewport;
+    }
+
+    public Vector2 getmPosition() {
+        return mPosition;
+    }
+
+    public void setmPosition(Vector2 mPosition) {
+        this.mPosition = mPosition;
+    }
+
+    public Vector2 getmVelocity() {
+        return mVelocity;
+    }
+
+    public void setmVelocity(Vector2 mVelocity) {
+        this.mVelocity = mVelocity;
+    }
+
+    public float getmGridLength() {
+        return mGridLength;
+    }
+
+    public void setmGridLength(float mGridLength) {
+        this.mGridLength = mGridLength;
     }
 }

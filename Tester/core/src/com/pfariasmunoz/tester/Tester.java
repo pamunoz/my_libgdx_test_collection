@@ -5,7 +5,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
@@ -33,7 +32,7 @@ public class Tester extends ApplicationAdapter{
 		batch = new SpriteBatch();
         timeElapsed = 0;
         speed = 1.0f;
-        pickLocation();
+        resetFootLocation();
 
     }
 
@@ -41,21 +40,28 @@ public class Tester extends ApplicationAdapter{
 	public void render () {
 
 		if (hasEaten()) {
-			pickLocation();
+			resetFootLocation();
 		}
-		updateDifficulty();
+
 
         myInput();
         timeElapsed += Gdx.graphics.getDeltaTime();
+		if (timeElapsed > 1.0f) {
+			seconds++;
+		}
+		if (seconds > 4) {
+			speed *= 2.0f;
+			seconds = 0;
+		}
+		if (timeElapsed > (1.0f/speed)) {
+			updateSnakePosition();
+			timeElapsed = 0;
+		}
+		updateDifficulty();
 		Gdx.gl.glClearColor(1, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         // TODO: change this function beecause is updating not every second
-        if (timeElapsed > (1.0f/speed)) {
-            position.x += velocity.x;
-            position.y += velocity.y;
-            ensureInBounds();
-            timeElapsed = 0;
-        }
+
 		renderer.begin(ShapeType.Filled);
 		renderer.setColor(Color.WHITE);
         // render snake
@@ -66,6 +72,11 @@ public class Tester extends ApplicationAdapter{
 		renderer.end();
 
 		renderer.begin(ShapeType.Line);
+		drawGridLines();
+		renderer.end();
+	}
+
+	private void drawGridLines() {
 		renderer.setColor(Color.BLUE);
 		for (int i = 0; i < Gdx.graphics.getHeight(); i++) {
 			renderer.line(0, i * scl, Gdx.graphics.getWidth(), i * scl);
@@ -73,9 +84,14 @@ public class Tester extends ApplicationAdapter{
 		for (int i = 0; i < Gdx.graphics.getWidth(); i++) {
 			renderer.line(i * scl, 0, i * scl, Gdx.graphics.getHeight());
 		}
-		renderer.end();
 	}
-	
+
+	private void updateSnakePosition() {
+		position.x += velocity.x;
+		position.y += velocity.y;
+		ensureSnakeInBounds();
+	}
+
 	@Override
 	public void dispose () {
         renderer.dispose();
@@ -99,26 +115,30 @@ public class Tester extends ApplicationAdapter{
 		}
 	}
 
-    public void pickLocation() {
+    public void resetFootLocation() {
 
         xFood = MathUtils.floor(MathUtils.random(columns));
         yFood = MathUtils.floor(MathUtils.random(rows));
         foodPos = new Vector2(xFood, yFood);
         foodPos.scl(scl);
 
-        if (foodPos.x > columns * scl - scl) {
-            pickLocation();
-        } else if (foodPos.x < 0) {
-            pickLocation();
-        }
-        // limit vertical movement
-        if (foodPos.y > rows * scl - scl) {
-            pickLocation();
-        } else if (foodPos.y < 0) {
-            pickLocation();
-        }
+		ensureFoodInBounds();
 
     }
+
+	private void ensureFoodInBounds() {
+		if (foodPos.x > columns * scl - scl) {
+            resetFootLocation();
+        } else if (foodPos.x < 0) {
+            resetFootLocation();
+        }
+		// limit vertical movement
+		if (foodPos.y > rows * scl - scl) {
+            resetFootLocation();
+        } else if (foodPos.y < 0) {
+            resetFootLocation();
+        }
+	}
 
 	public boolean hasEaten() {
 		if (position.dst(foodPos) < 1.0f) {
@@ -128,7 +148,7 @@ public class Tester extends ApplicationAdapter{
 		}
 	}
 
-    public void ensureInBounds() {
+    public void ensureSnakeInBounds() {
         // limit horizontal movement
         if (position.x > columns * scl - scl) {
             position.x = columns * scl - scl;
@@ -144,13 +164,8 @@ public class Tester extends ApplicationAdapter{
     }
 
 	public void updateDifficulty() {
-		if (timeElapsed > 1) {
-			seconds++;
-		}
-		if (seconds > 10) {
-			speed += 0.3;
-			seconds = 0;
-		}
+
+
 	}
 
 }
