@@ -13,6 +13,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.TimeUtils;
 
 public class Tester extends ApplicationAdapter{
@@ -20,23 +21,39 @@ public class Tester extends ApplicationAdapter{
     BitmapFont font;
 	ShapeRenderer renderer;
 	Vector2 position, velocity, foodPos;
-    float timeElapsed, scl, speed, secondsPassed, lastTime;
+    public static final float SCL = 60;
+    float timeElapsed, speed, secondsPassed, lastTime;
     int seconds, xFood, yFood, columns, rows;
+    Array<Vector2> tail;
+
+    private static final Vector2 RIGHT = new Vector2(SCL, 0);
+    private static final Vector2 LEFT = new Vector2(-SCL, 0);
+    private static final Vector2 UP = new Vector2(0, SCL);
+    private static final Vector2 DOWN = new Vector2(0, -SCL);
+
+    public enum Direction {
+        RIGHT, LEFT, UP, DOWN
+    }
+    private Direction direction;
+
+
 	
 	@Override
 	public void create () {
+        direction = Direction.RIGHT;
         batch = new SpriteBatch();
         font = new BitmapFont();
         font.getRegion().getTexture().setFilter(TextureFilter.Linear,TextureFilter.Linear);
-        font.getData().setScale(3.0f);
+        font.getData().setScale(2.0f);
 
         seconds = 0;
-        scl = 15;
-        columns = MathUtils.floor(Gdx.graphics.getWidth() / scl);
-        rows = MathUtils.floor(Gdx.graphics.getHeight() / scl);
+        columns = MathUtils.floor(Gdx.graphics.getWidth() / SCL);
+        rows = MathUtils.floor(Gdx.graphics.getHeight() / SCL);
 		renderer = new ShapeRenderer();
         position = new Vector2(0, 0);
-        velocity = new Vector2(scl, 0);
+        tail = new Array<Vector2>();
+        tail.add(position);
+        velocity = new Vector2(SCL, 0);
 
 		batch = new SpriteBatch();
         timeElapsed = 0;
@@ -55,12 +72,11 @@ public class Tester extends ApplicationAdapter{
 			resetFootLocation();
 		}
 
-
         myInput();
         // Update the difficulty
         secondsPassed += Gdx.graphics.getDeltaTime();
-		if (secondsPassed > 4.0f) {
-			speed *= 1.01f;
+		if (secondsPassed > 2.0f) {
+			speed *= 3.01f;
 			secondsPassed = 0;
 		}
         // update the position of the snake on the grid
@@ -70,17 +86,19 @@ public class Tester extends ApplicationAdapter{
 			updateSnakePosition();
 			timeElapsed = 0;
 		}
-		updateDifficulty();
+
 		Gdx.gl.glClearColor(1, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
 		renderer.begin(ShapeType.Filled);
 		renderer.setColor(Color.WHITE);
         // render snake
-		renderer.rect(position.x, position.y, scl, scl);
+        for (Vector2 vector : tail) {
+            renderer.rect(vector.x, vector.y, SCL, SCL);
+        }
         // render food
 		renderer.setColor(Color.GREEN);
-		renderer.rect(foodPos.x, foodPos.y, scl, scl);
+		renderer.rect(foodPos.x, foodPos.y, SCL, SCL);
 		renderer.end();
 
 		renderer.begin(ShapeType.Line);
@@ -88,7 +106,8 @@ public class Tester extends ApplicationAdapter{
 		renderer.end();
 
         batch.begin();
-        font.draw(batch, "Seconds: " + secondsPassed + "\nSpeed: " + speed, Gdx.graphics.getWidth() / 4, Gdx.graphics.getHeight() / 2, 0, Align.left, false);
+        font.draw(batch, "Seconds: " + secondsPassed + "\nSpeed: " + speed,
+                Gdx.graphics.getWidth() / 4, Gdx.graphics.getHeight() / 2, 0, Align.left, false);
         batch.end();
 
 
@@ -97,10 +116,10 @@ public class Tester extends ApplicationAdapter{
 	private void drawGridLines() {
 		renderer.setColor(Color.BLUE);
 		for (int i = 0; i < Gdx.graphics.getHeight(); i++) {
-			renderer.line(0, i * scl, Gdx.graphics.getWidth(), i * scl);
+			renderer.line(0, i * SCL, Gdx.graphics.getWidth(), i * SCL);
 		}
 		for (int i = 0; i < Gdx.graphics.getWidth(); i++) {
-			renderer.line(i * scl, 0, i * scl, Gdx.graphics.getHeight());
+			renderer.line(i * SCL, 0, i * SCL, Gdx.graphics.getHeight());
 		}
 	}
 
@@ -123,13 +142,17 @@ public class Tester extends ApplicationAdapter{
 
 	private void myInput() {
 		if (Gdx.input.isKeyPressed(Keys.RIGHT)) {
-			turn(new Vector2(scl, 0));
+            direction = Direction.RIGHT;
+			turn(RIGHT);
 		} else if (Gdx.input.isKeyPressed(Keys.LEFT)) {
-			turn(new Vector2(-scl, 0));
+            direction = Direction.LEFT;
+			turn(LEFT);
 		} else if (Gdx.input.isKeyPressed(Keys.UP)) {
-			turn(new Vector2(0, scl));
+            direction = Direction.UP;
+			turn(UP);
 		} else if (Gdx.input.isKeyPressed(Keys.DOWN)) {
-			turn(new Vector2(0, -scl));
+            direction = Direction.DOWN;
+			turn(DOWN);
 		}
 	}
 
@@ -138,20 +161,20 @@ public class Tester extends ApplicationAdapter{
         xFood = MathUtils.floor(MathUtils.random(columns));
         yFood = MathUtils.floor(MathUtils.random(rows));
         foodPos = new Vector2(xFood, yFood);
-        foodPos.scl(scl);
+        foodPos.scl(SCL);
 
 		ensureFoodInBounds();
 
     }
 
 	private void ensureFoodInBounds() {
-		if (foodPos.x > columns * scl - scl) {
+		if (foodPos.x > columns * SCL - SCL) {
             resetFootLocation();
         } else if (foodPos.x < 0) {
             resetFootLocation();
         }
 		// limit vertical movement
-		if (foodPos.y > rows * scl - scl) {
+		if (foodPos.y > rows * SCL - SCL) {
             resetFootLocation();
         } else if (foodPos.y < 0) {
             resetFootLocation();
@@ -168,22 +191,19 @@ public class Tester extends ApplicationAdapter{
 
     public void ensureSnakeInBounds() {
         // limit horizontal movement
-        if (position.x > columns * scl - scl) {
-            position.x = columns * scl - scl;
+        if (position.x > columns * SCL - SCL) {
+            position.x = columns * SCL - SCL;
         } else if (position.x < 0) {
             position.x = 0;
         }
         // limit vertical movement
-        if (position.y > rows * scl - scl) {
-            position.y = rows * scl - scl;
+        if (position.y > rows * SCL - SCL) {
+            position.y = rows * SCL - SCL;
         } else if (position.y < 0) {
             position.y = 0;
         }
     }
 
-	public void updateDifficulty() {
 
-
-	}
 
 }
