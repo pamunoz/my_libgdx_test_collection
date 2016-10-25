@@ -21,7 +21,7 @@ public class Tester extends ApplicationAdapter{
     BitmapFont font;
 	ShapeRenderer renderer;
 	Vector2 position, velocity, foodPos;
-    public static final float SCL = 60;
+    public static final float SCL = 15;
     float timeElapsed, speed, secondsPassed, lastTime;
     int seconds, xFood, yFood, columns, rows;
     Array<Vector2> tail;
@@ -68,6 +68,8 @@ public class Tester extends ApplicationAdapter{
 	@Override
 	public void render () {
 
+
+
 		if (hasEaten()) {
 			resetFootLocation();
 		}
@@ -76,14 +78,14 @@ public class Tester extends ApplicationAdapter{
         // Update the difficulty
         secondsPassed += Gdx.graphics.getDeltaTime();
 		if (secondsPassed > 2.0f) {
-			speed *= 3.01f;
+			speed *= 1.1f;
 			secondsPassed = 0;
 		}
         // update the position of the snake on the grid
 
         timeElapsed += Gdx.graphics.getDeltaTime();
 		if (timeElapsed > (1.0f/speed)) {
-			updateSnakePosition();
+			updateSnakePosition(position);
 			timeElapsed = 0;
 		}
 
@@ -109,6 +111,21 @@ public class Tester extends ApplicationAdapter{
         font.draw(batch, "Seconds: " + secondsPassed + "\nSpeed: " + speed,
                 Gdx.graphics.getWidth() / 4, Gdx.graphics.getHeight() / 2, 0, Align.left, false);
         batch.end();
+        if (hasEaten()) {
+            switch (direction) {
+                case RIGHT:
+                    tail.add(new Vector2(position.x - SCL, position.y));
+                    break;
+                case LEFT:
+                    tail.add(new Vector2(position.x + SCL, position.y));
+                    break;
+                case UP:
+                    tail.add(new Vector2(position.x, position.y - SCL));
+                    break;
+                case DOWN:
+                    tail.add(new Vector2(position.x, position.y + SCL));
+            }
+        }
 
 
 	}
@@ -123,10 +140,10 @@ public class Tester extends ApplicationAdapter{
 		}
 	}
 
-	private void updateSnakePosition() {
-		position.x += velocity.x;
-		position.y += velocity.y;
-		ensureSnakeInBounds();
+	private void updateSnakePosition(Vector2 pos) {
+		pos.x += velocity.x;
+		pos.y += velocity.y;
+		ensureSnakeInBounds(pos);
 	}
 
 	@Override
@@ -189,18 +206,18 @@ public class Tester extends ApplicationAdapter{
 		}
 	}
 
-    public void ensureSnakeInBounds() {
+    public void ensureSnakeInBounds(Vector2 pos) {
         // limit horizontal movement
-        if (position.x > columns * SCL - SCL) {
-            position.x = columns * SCL - SCL;
-        } else if (position.x < 0) {
-            position.x = 0;
+        if (pos.x > columns * SCL - SCL) {
+            pos.x = columns * SCL - SCL;
+        } else if (pos.x < 0) {
+            pos.x = 0;
         }
         // limit vertical movement
-        if (position.y > rows * SCL - SCL) {
-            position.y = rows * SCL - SCL;
-        } else if (position.y < 0) {
-            position.y = 0;
+        if (pos.y > rows * SCL - SCL) {
+            pos.y = rows * SCL - SCL;
+        } else if (pos.y < 0) {
+            pos.y = 0;
         }
     }
 
