@@ -5,83 +5,101 @@ import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture.TextureFilter;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
+import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
+import com.pfariasmunoz.game.Constants.Direction;
 
 
 public class GameScreen extends InputAdapter implements Screen {
 
     public static final String TAG = GameScreen.class.getName();
 
-    private SnakeGame mGame;
-    private ExtendViewport mSnakeViewport;
-    private ShapeRenderer mRenderer;
+    SnakeGame game;
+    Direction direction;
 
-    private Snake mSnake;
-    private Food mFood;
-    private Vector2 mPosition;
+    Viewport snakeViewport;
+    ShapeRenderer renderer;
 
-    private float mGridLength;
+    ScreenViewport hudViewport;
+    SpriteBatch batch;
+    BitmapFont font;
 
-    private int mSeconds;
+    Snake snake;
+    Food food;
+
+    int topScore;
+    int columns;
+    int rows;
 
     public GameScreen(SnakeGame game) {
-        this.mGame = game;
+        this.game = game;
     }
 
     @Override
     public void show() {
-        mGame = new SnakeGame();
-        mSnakeViewport = new ExtendViewport(
-                Constants.GAME_WORLD_WIDTH,
-                Constants.GAME_WORLD_HEIGHT);
-        mRenderer = new ShapeRenderer();
-        mRenderer.setAutoShapeType(true);
+        snakeViewport = new FitViewport(Constants.WORLD_SIZE, Constants.WORLD_SIZE);
 
-        mGridLength = 15;
-        mSnake = new Snake(mSnakeViewport, mGridLength);
-        mFood = new Food(mSnakeViewport, mGridLength);
+        renderer = new ShapeRenderer();
+        renderer.setAutoShapeType(true);
 
+        hudViewport = new ScreenViewport();
+        batch = new SpriteBatch();
+
+        font = new BitmapFont();
+        font.getRegion().getTexture().setFilter(TextureFilter.Linear, TextureFilter.Linear);
+
+        snake = new Snake();
+        food = new Food(snakeViewport);
 
         Gdx.input.setInputProcessor(this);
 
-        mSeconds = 0;
+        topScore = 0;
+        columns = MathUtils.floor(Constants.WORLD_SIZE / Constants.GRID_SIDE);
+        rows = MathUtils.floor(Constants.WORLD_SIZE / Constants.GRID_SIDE);
+        System.out.printf("Game width: " + snakeViewport.getWorldWidth());
+        System.out.printf("Game height: " + snakeViewport.getWorldHeight());
+        snakeViewport.getCamera().position.set(
+                Constants.WORLD_SIZE / 2, Constants.WORLD_SIZE / 2, 0);
     }
 
     @Override
     public void resize(int width, int height) {
-        mSnakeViewport.update(width, height, true);
-        mSnake.init();
+        snakeViewport.update(width, height, true);
+        snakeViewport.getCamera().position.set(
+                Constants.WORLD_SIZE / 2, Constants.WORLD_SIZE / 2, 0);
+        hudViewport.update(width, height, true);
+        font.getData().setScale(Math.min(width, height) / Constants.HUD_FONT_REFERENCE_SCREEN_SIZE);
     }
 
     @Override
     public void render(float delta) {
-
-
-        mSnakeViewport.apply(true);
-        mSnake.update();
-        mSnake.move();
-
-        if (mSnake.hasEaten(mFood.getPosition())) {
-            mFood.resetPosition();
-        }
-        Gdx.gl.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        snake.update(delta);
+        snakeViewport.apply(true);
+        Gdx.gl.glClearColor(
+                Constants.BACKGROUND_COLOR.r,
+                Constants.BACKGROUND_COLOR.g,
+                Constants.BACKGROUND_COLOR.b, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
-        mRenderer.setProjectionMatrix(mSnakeViewport.getCamera().combined);
-        mRenderer.begin();
-        mRenderer.setColor(Color.BLUE);
-        mSnake.render(mRenderer);
-        mRenderer.setColor(Color.WHITE);
-        mFood.render(mRenderer);
-        mRenderer.setColor(Color.CHARTREUSE);
-        drawGridLines(mRenderer);
-        mRenderer.end();
+        renderer.setProjectionMatrix(snakeViewport.getCamera().combined);
+        renderer.begin(ShapeType.Filled);
+        renderer.setColor(Color.RED);
+//        renderer.rect(Constants.WORLD_SIZE - Constants.GRID_SIDE, 0,
+//                Constants.GRID_SIDE, Constants.GRID_SIDE);
+        snake.update(delta);
+        snake.render(renderer);
+        drawGrid(renderer);
+        renderer.end();
 
     }
-
 
     @Override
     public void pause() {
@@ -95,23 +113,28 @@ public class GameScreen extends InputAdapter implements Screen {
 
     @Override
     public void hide() {
-        mRenderer.dispose();
+        renderer.dispose();
+        batch.dispose();
+
     }
 
     @Override
     public void dispose() {
-        mRenderer.dispose();
 
     }
 
-    private void drawGridLines(ShapeRenderer renderer) {
+    private void drawGrid(ShapeRenderer renderer) {
         renderer.set(ShapeType.Line);
-        for (int i = 0; i < mSnakeViewport.getWorldHeight(); i++) {
-            renderer.line(0, i * mGridLength, mSnakeViewport.getWorldWidth(), i * mGridLength);
-        }
-        for (int i = 0; i < mSnakeViewport.getWorldWidth(); i++) {
-            renderer.line(i * mGridLength, 0, i * mGridLength, mSnakeViewport.getWorldHeight());
+        renderer.setColor(Color.GRAY);
+        for (int i = 0; i < columns + 1; i++) {
+
+            for (int j = 0; j < rows + 1; j++) {
+                renderer.line(
+                        Constants.GRID_SIDE * i, 0,
+                        Constants.GRID_SIDE * i, Constants.WORLD_SIZE);
+                renderer.line(0, Constants.GRID_SIDE * j,
+                        Constants.WORLD_SIZE, Constants.GRID_SIDE * j);
+            }
         }
     }
-
 }

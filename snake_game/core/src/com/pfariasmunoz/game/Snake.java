@@ -2,141 +2,130 @@ package com.pfariasmunoz.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.Viewport;
+
+import com.pfariasmunoz.game.Constants.Direction;
 
 public class Snake {
 
     public static final String TAG = Snake.class.getName();
 
-    private Viewport mViewport;
+    private Direction direction;
+
     private Vector2 mPosition;
-    Vector2 mVelocity;
+    private Vector2 mVelocity;
 
-    private float mGridLength;
-    private int columns;
-    private int rows;
+    private float mElapsedTime;
 
+    private float mSpeed, mSecondsToSpeedUp, mSecondsToMove;
 
-    public Snake(Viewport viewport, float gridLength) {
-        this.mViewport = viewport;
-        this.mGridLength = gridLength;
-        columns = MathUtils.floor(viewport.getWorldWidth() / gridLength);
-        rows = MathUtils.floor(viewport.getWorldHeight() / gridLength);
-        init();
+    private Array<Vector2> tail;
+
+    public Snake() {
+        mSpeed = 1.0f;
+        mSecondsToSpeedUp = 0;
+        mSecondsToMove = 0;
+        mPosition = new Vector2();
+        tail = new Array<Vector2>();
+        tail.add(mPosition);
+        direction = Direction.RIGHT;
+        mVelocity = new Vector2(Constants.GRID_SIDE, 0);
+
     }
 
-    public void init() {
-        mPosition = new Vector2(0, 0);
-        mVelocity = new Vector2(mGridLength, 0);
-    }
-
-    /**
-     * Makes the snake turn according to the direction
-     * @param direction the direction of turn.
-     */
-    private void turn(Vector2 direction) {
-        mVelocity.x = direction.x;
-        mVelocity.y = direction.y;
-    }
-
-    /**
-     * Update the direction of the snake according to the keys pressed
-     */
-    public void update() {
-        if (Gdx.input.isKeyPressed(Keys.RIGHT)) {
-            turn(new Vector2(mGridLength, 0));
-        } else if (Gdx.input.isKeyPressed(Keys.LEFT)) {
-            turn(new Vector2(-mGridLength, 0));
-        } else if (Gdx.input.isKeyPressed(Keys.UP)) {
-            turn(new Vector2(0, mGridLength));
-        } else if (Gdx.input.isKeyPressed(Keys.DOWN)) {
-            turn(new Vector2(0, -mGridLength));
-        }
-    }
-
-    /**
-     * Move the snake with its velocity
-     */
-    public void move() {
-        mPosition.x += mVelocity.x;
-        mPosition.y += mVelocity.y;
-        ensureInBounds();
-    }
-
-    /**
-     * Limit the movement of the snake to the bounds of the screen
-     */
-    private void ensureInBounds() {
-        // limit the movement of the snake in the horizontal position
-        if (mPosition.x > columns * mGridLength - mGridLength) {
-            mPosition.x = columns * mGridLength - mGridLength;
-        } else if (mPosition.x < 0) {
-            mPosition.x = 0;
-        }
-        // limits the movement of the snake in the vertical position
-        if (mPosition.y > rows * mGridLength - mGridLength) {
-            mPosition.y = rows * mGridLength - mGridLength;
-        } else if (mPosition.y < 0) {
-            mPosition.y = 0;
-        }
-    }
-
-    /**
-     * answers if the snake has eaten the food
-      * @param foodPosition the position on the grid of the food
-     * @return the answer if the snake has eaten.
-     */
-    public boolean hasEaten(Vector2 foodPosition) {
-        if (mPosition.dst(foodPosition) < mGridLength / 2.0f) {
-            return true;
-        } else {
-            return false;
-        }
-    }
 
     public void render(ShapeRenderer renderer) {
         renderer.set(ShapeType.Filled);
-        renderer.rect(mPosition.x, mPosition.y, mGridLength, mGridLength);
+        renderer.setColor(
+                Constants.SNAKE_COLOR.r,
+                Constants.SNAKE_COLOR.g,
+                Constants.SNAKE_COLOR.b, 1);
+        for (int i = 0; i < tail.size; i++) {
+            renderer.rect(tail.get(i).x, tail.get(i).y,
+                    Constants.GRID_SIDE, Constants.GRID_SIDE);
+        }
+
     }
 
-
-    // ========== Getters and Setters ==============
-
-    public Viewport getmViewport() {
-        return mViewport;
+    public void update(float delta) {
+        mElapsedTime += delta;
+        updateDifficulty(delta);
+        move(delta);
+        updateDirection();
     }
 
-    public void setmViewport(Viewport mViewport) {
-        this.mViewport = mViewport;
+    private void updateDifficulty(float delta) {
+        mSecondsToSpeedUp += delta;
+        if (mSecondsToSpeedUp > Constants.DIFFICULTY_ACCELEROMETER) {
+            mSpeed *= Constants.SNAKE_ACCELERATION;
+            mSecondsToSpeedUp = 0;
+        }
+
     }
 
-    public Vector2 getmPosition() {
-        return mPosition;
+    private void move(float delta) {
+        mSecondsToMove += delta;
+        if (mSecondsToMove > 1.0f / mSpeed) {
+            updateSnakePosition(mPosition);
+            mSecondsToMove = 0;
+        }
     }
 
-    public void setmPosition(Vector2 mPosition) {
-        this.mPosition = mPosition;
+    private void updateSnakePosition(Vector2 targetPosition) {
+        targetPosition.x += mVelocity.x;
+        targetPosition.y += mVelocity.y;
     }
 
-    public Vector2 getmVelocity() {
-        return mVelocity;
+    private void turn(Vector2 directionToTurn) {
+        mVelocity.x = directionToTurn.x;
+        mVelocity.y = directionToTurn.y;
     }
 
-    public void setmVelocity(Vector2 mVelocity) {
-        this.mVelocity = mVelocity;
+    private void updateDirection() {
+        if (Gdx.input.isKeyPressed(Keys.RIGHT)) {
+            switch (direction) {
+                case RIGHT:
+                    direction = Direction.DONW;
+                    turn(Constants.DOWN);
+                    break;
+                case LEFT:
+                    direction = Direction.UP;
+                    turn(Constants.UP);
+                    break;
+                case UP:
+                    direction = Direction.RIGHT;
+                    turn(Constants.RIGHT);
+                    break;
+                case DONW:
+                    direction = Direction.LEFT;
+                    turn(Constants.LEFT);
+                    break;
+            }
+        } else if (Gdx.input.isKeyPressed(Keys.LEFT)) {
+            switch (direction) {
+                case RIGHT:
+                    direction = Direction.UP;
+                    turn(Constants.UP);
+                    break;
+                case LEFT:
+                    direction = Direction.DONW;
+                    turn(Constants.DOWN);
+                    break;
+                case UP:
+                    direction = Direction.LEFT;
+                    turn(Constants.LEFT);
+                    break;
+                case DONW:
+                    direction = Direction.RIGHT;
+                    turn(Constants.RIGHT);
+                    break;
+            }
+        }
     }
 
-    public float getmGridLength() {
-        return mGridLength;
-    }
-
-    public void setmGridLength(float mGridLength) {
-        this.mGridLength = mGridLength;
-    }
 }
