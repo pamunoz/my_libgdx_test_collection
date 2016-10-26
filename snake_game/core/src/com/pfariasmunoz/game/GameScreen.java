@@ -19,6 +19,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import com.pfariasmunoz.game.Constants.Direction;
 
 
+
 public class GameScreen extends InputAdapter implements Screen {
 
     public static final String TAG = GameScreen.class.getName();
@@ -82,13 +83,7 @@ public class GameScreen extends InputAdapter implements Screen {
 
     @Override
     public void render(float delta) {
-        snake.update(delta);
-        snakeViewport.apply(true);
-        Gdx.gl.glClearColor(
-                Constants.BACKGROUND_COLOR.r,
-                Constants.BACKGROUND_COLOR.g,
-                Constants.BACKGROUND_COLOR.b, 1);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        prepareScreen();
         renderer.setProjectionMatrix(snakeViewport.getCamera().combined);
         renderer.begin(ShapeType.Filled);
         renderer.setColor(Color.RED);
@@ -136,5 +131,15 @@ public class GameScreen extends InputAdapter implements Screen {
                         Constants.WORLD_SIZE, Constants.GRID_SIDE * j);
             }
         }
+    }
+
+    private void prepareScreen() {
+        snakeViewport.apply(true);
+        Gdx.gl.glClearColor(
+                Constants.BACKGROUND_COLOR.r,
+                Constants.BACKGROUND_COLOR.g,
+                Constants.BACKGROUND_COLOR.b, 1);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
     }
 }

@@ -85,7 +85,10 @@ public class Tester extends ApplicationAdapter{
 
         timeElapsed += Gdx.graphics.getDeltaTime();
 		if (timeElapsed > (1.0f/speed)) {
-			updateSnakePosition(position);
+            for (Vector2 pos : tail) {
+                updateSnakePosition(pos);
+            }
+
 			timeElapsed = 0;
 		}
 
