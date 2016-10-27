@@ -10,11 +10,11 @@ import com.badlogic.gdx.math.Vector2;
 
 public class Constants {
     // World constants
-    public static final float WORLD_SIZE = 16;
+    public static final float WORLD_SIZE =480;
     public static final Color BACKGROUND_COLOR = Color.BLUE;
 
     // Mobs constants
-    public static final float GRID_SIDE = 0.4f;
+    public static final float GRID_SIDE = WORLD_SIZE / 40.0f;
     public static final Color SNAKE_COLOR = Color.WHITE;
 
     public static final Color FOOD_COLOR = Color.RED;

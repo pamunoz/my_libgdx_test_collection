@@ -5,6 +5,7 @@ import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.TimeUtils;
@@ -15,50 +16,45 @@ public class Snake {
 
     public static final String TAG = Snake.class.getName();
 
-    private Direction mCurrentDirection;
-
     private Vector2 mPosition;
-    private Vector2 mVelocity;
-
-    private float initialTime;
+    private Vector2 mDirection;
 
     private float mSpeed, mSecondsToSpeedUp, mSecondsToMove;
 
     private Array<Vector2> tail;
 
     public Snake() {
-        initialTime = TimeUtils.nanoTime();
+        mDirection = new Vector2(Constants.GRID_SIDE, 0);
+        mPosition = new Vector2();
         mSpeed = 1.0f;
         mSecondsToSpeedUp = 0;
         mSecondsToMove = 0;
-        mPosition = new Vector2();
         tail = new Array<Vector2>();
-        tail.add(mPosition);
-        mCurrentDirection = Direction.RIGHT;
-        mVelocity = new Vector2(mCurrentDirection.getDir());
-
+        init();
     }
 
+    public void init() {
+        tail.add(mPosition);
+    }
 
     public void render(ShapeRenderer renderer) {
-        float elapsedTime = TimeUtils.nanoTime() - initialTime;
 
         renderer.set(ShapeType.Filled);
         renderer.setColor(
                 Constants.SNAKE_COLOR.r,
                 Constants.SNAKE_COLOR.g,
                 Constants.SNAKE_COLOR.b, 1);
-        for (int i = 0; i < tail.size; i++) {
-            renderer.rect(tail.get(i).x, tail.get(i).y,
-                    Constants.GRID_SIDE, Constants.GRID_SIDE);
-        }
-
+//        for (int i = 0; i < tail.size; i++) {
+//            renderer.rect(tail.get(i).x, tail.get(i).y,
+//                    Constants.GRID_SIDE, Constants.GRID_SIDE);
+//        }
+        renderer.rect(mPosition.x, mPosition.y, Constants.GRID_SIDE, Constants.GRID_SIDE);
     }
 
     public void update(float delta) {
-        updateDifficulty(delta);
         move(delta);
-        mCurrentDirection.toString();
+        updateDirection();
+        //updateDifficulty(delta);
     }
 
     private void updateDifficulty(float delta) {
@@ -70,12 +66,11 @@ public class Snake {
 
     }
 
-    private void move(float delta) {
+    public void move(float delta) {
         mSecondsToMove += delta;
         if (mSecondsToMove > 1.0f / mSpeed) {
             //updateSnakePosition(mPosition);
-            mPosition.x += mCurrentDirection.getDir().x;
-            mPosition.y += mCurrentDirection.getDir().y;
+            mPosition.add(mDirection);
             ensureInBounds();
             mSecondsToMove = 0;
         }
@@ -83,44 +78,50 @@ public class Snake {
 
 
 
-    private void turn(Vector2 vector) {
-        mVelocity.x = vector.x;
-        mVelocity.y = vector.y;
-    }
+
 
     private void updateDirection() {
         if (Gdx.input.isKeyPressed(Keys.RIGHT)) {
-            switch (mCurrentDirection) {
-                case RIGHT:
-                    mCurrentDirection = Direction.DOWN;
-                    break;
-                case LEFT:
-                    mCurrentDirection = Direction.UP;
-                    break;
-                case UP:
-                    mCurrentDirection = Direction.RIGHT;
-                    break;
-                case DOWN:
-                    mCurrentDirection = Direction.LEFT;
+            // if snake is going to the right move down
+            if (mDirection.x > 0) {
+                mDirection = new Vector2(0, -Constants.GRID_SIDE);
+            }
+            // if snake is going to the left move up
+            if (mDirection.x < 0) {
+                mDirection = new Vector2(0, Constants.GRID_SIDE);
+            }
+            // if snake is going up move right
+            if (mDirection.y > 0) {
+                mDirection = new Vector2(Constants.GRID_SIDE, 0);
+            }
+            // if snake is going down move left
+            if (mDirection.y < 0) {
+                mDirection = new Vector2(-Constants.GRID_SIDE, 0);
             }
         }
         if (Gdx.input.isKeyPressed(Keys.LEFT)) {
-            switch (mCurrentDirection) {
-                case RIGHT:
-                    mCurrentDirection = Direction.UP;
-                    break;
-                case LEFT:
-                    mCurrentDirection = Direction.DOWN;
-                    break;
-                case UP:
-                    mCurrentDirection = Direction.LEFT;
-                    break;
-                case DOWN:
-                    mCurrentDirection = Direction.RIGHT;
+            // if snake is going to the right move up
+            if (mDirection.x > 0) {
+                mDirection = new Vector2(0, Constants.GRID_SIDE);
+            }
+            // if snake is going to the left move down
+            if (mDirection.x < 0) {
+                mDirection = new Vector2(0, -Constants.GRID_SIDE);
+            }
+            // if snake is going up move left
+            if (mDirection.y > 0) {
+                mDirection = new Vector2(-Constants.GRID_SIDE, 0);
+            }
+            // if snake is going down move right
+            if (mDirection.y < 0) {
+                mDirection = new Vector2(Constants.GRID_SIDE, 0);
             }
         }
-        ensureInBounds();
     }
+
+
+
+
 
 
     private void ensureInBounds() {

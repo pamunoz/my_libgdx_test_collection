@@ -83,13 +83,15 @@ public class GameScreen extends InputAdapter implements Screen {
 
     @Override
     public void render(float delta) {
+        snake.move(delta);
+        snake.update(delta);
         prepareScreen();
         renderer.setProjectionMatrix(snakeViewport.getCamera().combined);
         renderer.begin(ShapeType.Filled);
         renderer.setColor(Color.RED);
 //        renderer.rect(Constants.WORLD_SIZE - Constants.GRID_SIDE, 0,
 //                Constants.GRID_SIDE, Constants.GRID_SIDE);
-        snake.update(delta);
+
         snake.render(renderer);
         drawGrid(renderer);
         renderer.end();
