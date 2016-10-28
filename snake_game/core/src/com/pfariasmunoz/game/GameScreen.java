@@ -23,78 +23,104 @@ import com.pfariasmunoz.game.Constants.Direction;
 public class GameScreen extends InputAdapter implements Screen {
 
     public static final String TAG = GameScreen.class.getName();
+    // prepare the game
+    private SnakeGame mGame;
+    private SpriteBatch mBatch;
+    private BitmapFont mFont;
+    private Viewport mSnakeViewport;
+    private ShapeRenderer mRenderer;
 
-    SnakeGame game;
-    Direction direction;
+    // prepare players
 
-    Viewport snakeViewport;
-    ShapeRenderer renderer;
+    private Snake mSnake;
+    private Food mFood;
 
-    ScreenViewport hudViewport;
-    SpriteBatch batch;
-    BitmapFont font;
+    private float mSecondsElapsed;
 
-    Snake snake;
-    Food food;
+    private boolean mGameover;
 
-    int topScore;
-    int columns;
-    int rows;
+    private static final Vector2[] directions = {
+            Direction.DOWN.getDir(),
+            Direction.UP.getDir(),
+            Direction.RIGHT.getDir(),
+            Direction.LEFT.getDir()};
+    private int dir = 2;
+
 
     public GameScreen(SnakeGame game) {
-        this.game = game;
+        this.mGame = game;
     }
 
     @Override
     public void show() {
-        snakeViewport = new FitViewport(Constants.WORLD_SIZE, Constants.WORLD_SIZE);
+        mBatch = new SpriteBatch();
 
-        renderer = new ShapeRenderer();
-        renderer.setAutoShapeType(true);
+        mFont = new BitmapFont();
+        mFont.getRegion().getTexture().setFilter(TextureFilter.Linear, TextureFilter.Linear);
+        mFont.getData().setScale(3.0f);
 
-        hudViewport = new ScreenViewport();
-        batch = new SpriteBatch();
+        mSnakeViewport = new ExtendViewport(Constants.WORLD_WIDTH, Constants.WORLD_HEIGHT);
+        mRenderer = new ShapeRenderer();
+        mRenderer.setAutoShapeType(true);
 
-        font = new BitmapFont();
-        font.getRegion().getTexture().setFilter(TextureFilter.Linear, TextureFilter.Linear);
+        mSnake = new Snake(mSnakeViewport);
+        mFood = new Food(mSnakeViewport);
+        mFood.resetFoodPosition();
 
-        snake = new Snake();
-        food = new Food(snakeViewport);
+        mSecondsElapsed = 0;
+        mGameover = false;
 
         Gdx.input.setInputProcessor(this);
-
-        topScore = 0;
-        columns = MathUtils.floor(Constants.WORLD_SIZE / Constants.GRID_SIDE);
-        rows = MathUtils.floor(Constants.WORLD_SIZE / Constants.GRID_SIDE);
-        System.out.printf("Game width: " + snakeViewport.getWorldWidth());
-        System.out.printf("Game height: " + snakeViewport.getWorldHeight());
-        snakeViewport.getCamera().position.set(
-                Constants.WORLD_SIZE / 2, Constants.WORLD_SIZE / 2, 0);
     }
 
     @Override
     public void resize(int width, int height) {
-        snakeViewport.update(width, height, true);
-        snakeViewport.getCamera().position.set(
-                Constants.WORLD_SIZE / 2, Constants.WORLD_SIZE / 2, 0);
-        hudViewport.update(width, height, true);
-        font.getData().setScale(Math.min(width, height) / Constants.HUD_FONT_REFERENCE_SCREEN_SIZE);
+        mSnakeViewport.update(width, height, true);
     }
 
     @Override
     public void render(float delta) {
-        snake.move(delta);
-        snake.update(delta);
-        prepareScreen();
-        renderer.setProjectionMatrix(snakeViewport.getCamera().combined);
-        renderer.begin(ShapeType.Filled);
-        renderer.setColor(Color.RED);
-//        renderer.rect(Constants.WORLD_SIZE - Constants.GRID_SIDE, 0,
-//                Constants.GRID_SIDE, Constants.GRID_SIDE);
+        mSecondsElapsed += delta;
 
-        snake.render(renderer);
-        drawGrid(renderer);
-        renderer.end();
+        mSnakeViewport.apply();
+        Gdx.gl.glClearColor(
+                Constants.BACKGROUND_COLOR.r,
+                Constants.BACKGROUND_COLOR.g,
+                Constants.BACKGROUND_COLOR.b,
+                Constants.BACKGROUND_COLOR.a);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+        mRenderer.setProjectionMatrix(mSnakeViewport.getCamera().combined);
+        mRenderer.begin();
+        //drawGrid(mRenderer);
+
+        if (!mGameover) {
+            mSnake.render(mRenderer);
+            mFood.render(mRenderer);
+
+            if (mSecondsElapsed > 0.2f) {
+                mSnake.addBlock();
+//                if (mSnake.isDead()) {
+//                    mGameover = true;
+//                }
+
+                if (mSnake.getTail().get(0).epsilonEquals(mFood.getFoodPosition(), 0.02f)) {
+                    mFood.resetFoodPosition();
+                } else {
+                    mSnake.removeLastElement();
+                }
+
+                mSecondsElapsed = 0;
+            }
+
+        } else {
+            mBatch.setProjectionMatrix(mSnakeViewport.getCamera().combined);
+            mBatch.begin();
+            mFont.draw(mBatch, "GAME OVER", mSnakeViewport.getWorldWidth() / 4, mSnakeViewport.getWorldHeight() / 2);
+            mBatch.end();
+        }
+
+        mRenderer.end();
 
     }
 
@@ -110,38 +136,33 @@ public class GameScreen extends InputAdapter implements Screen {
 
     @Override
     public void hide() {
-        renderer.dispose();
-        batch.dispose();
-
+        mRenderer.dispose();
+        mBatch.dispose();
+        mFont.dispose();
     }
 
     @Override
     public void dispose() {
-
+        mRenderer.dispose();
+        mBatch.dispose();
+        mFont.dispose();
     }
 
     private void drawGrid(ShapeRenderer renderer) {
-        renderer.set(ShapeType.Line);
-        renderer.setColor(Color.GRAY);
-        for (int i = 0; i < columns + 1; i++) {
-
-            for (int j = 0; j < rows + 1; j++) {
+        mRenderer.setColor(Color.RED);
+        mRenderer.set(ShapeType.Line);
+        for (int i = 1; i < Constants.COLUMNS; i ++) {
+            for (int j = 1; j < Constants.ROWS; j ++) {
                 renderer.line(
-                        Constants.GRID_SIDE * i, 0,
-                        Constants.GRID_SIDE * i, Constants.WORLD_SIZE);
-                renderer.line(0, Constants.GRID_SIDE * j,
-                        Constants.WORLD_SIZE, Constants.GRID_SIDE * j);
+                        i * Constants.BLOCK_SIZE, 0,
+                        i * Constants.BLOCK_SIZE, Constants.WORLD_HEIGHT);
+                renderer.line(
+                        0, j * Constants.BLOCK_SIZE,
+                        Constants.WORLD_WIDTH, j * Constants.BLOCK_SIZE
+                );
             }
         }
-    }
-
-    private void prepareScreen() {
-        snakeViewport.apply(true);
-        Gdx.gl.glClearColor(
-                Constants.BACKGROUND_COLOR.r,
-                Constants.BACKGROUND_COLOR.g,
-                Constants.BACKGROUND_COLOR.b, 1);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
     }
+
 }

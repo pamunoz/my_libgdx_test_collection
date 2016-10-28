@@ -14,9 +14,33 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 
 public class Food {
 
+    private Vector2 mFoodPosition;
+
     Viewport viewport;
 
     public Food(Viewport viewport) {
         this.viewport = viewport;
+        mFoodPosition = new Vector2();
+    }
+
+    public void render(ShapeRenderer renderer) {
+        renderer.set(ShapeType.Filled);
+        renderer.setColor(Color.CHARTREUSE);
+        renderer.rect(mFoodPosition.x, mFoodPosition.y, Constants.BLOCK_SIZE, Constants.BLOCK_SIZE);
+    }
+
+    public void resetFoodPosition() {
+        int x = MathUtils.floor(MathUtils.random(Constants.COLUMNS));
+        int y = MathUtils.floor(MathUtils.random(Constants.ROWS));
+        mFoodPosition = new Vector2(x, y);
+        mFoodPosition.scl(Constants.BLOCK_SIZE);
+    }
+
+    public void setFoodPosition(Vector2 foodPosition) {
+        this.mFoodPosition = foodPosition;
+    }
+
+    public Vector2 getFoodPosition() {
+        return mFoodPosition;
     }
 }

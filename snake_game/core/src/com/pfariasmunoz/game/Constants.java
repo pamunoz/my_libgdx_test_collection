@@ -3,42 +3,29 @@ package com.pfariasmunoz.game;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
 
 /**
  * Created by Pablo Farias on 20-10-16.
  */
 
 public class Constants {
-    // World constants
-    public static final float WORLD_SIZE =480;
-    public static final Color BACKGROUND_COLOR = Color.BLUE;
+    // Setting up the screen with its grid
+    public static final float BLOCK_SIZE = 16;
+    public static final float COLUMNS = 40;
+    public static final float ROWS = 40;
+    public static final float WORLD_WIDTH = BLOCK_SIZE * COLUMNS;
+    public static final float WORLD_HEIGHT = BLOCK_SIZE * ROWS;
+    public static final Color BACKGROUND_COLOR = new Color(0.3764705882f, 0.3764705882f, 0.3764705882f, 1.0f);
 
-    // Mobs constants
-    public static final float GRID_SIDE = WORLD_SIZE / 40.0f;
-    public static final Color SNAKE_COLOR = Color.WHITE;
-
-    public static final Color FOOD_COLOR = Color.RED;
-
-    // Directions
-    private static final Vector2 RIGHT = new Vector2(GRID_SIDE, 0);
-    private static final Vector2 LEFT = new Vector2(-GRID_SIDE, 0);
-    private static final Vector2 UP = new Vector2(0, GRID_SIDE);
-    private static final Vector2 DOWN = new Vector2(0, -GRID_SIDE);
-
-    public static final float DIFFICULTY_ACCELEROMETER = 2.0f;
-    public static final float SNAKE_ACCELERATION = 0.1f;
-
-    // HUD
-    public static final float HUD_FONT_REFERENCE_SCREEN_SIZE = 480.0f;
-    public static final float HUD_MARGIN = 20.0f;
-
-    public static final int COLUMNS = MathUtils.floor(WORLD_SIZE / GRID_SIDE);
 
     public enum Direction {
-        RIGHT(Constants.RIGHT),
-        LEFT(Constants.LEFT),
-        UP(Constants.UP),
-        DOWN(Constants.DOWN);
+        DOWN(new Vector2(0, -Constants.BLOCK_SIZE)),
+        UP(new Vector2(0, Constants.BLOCK_SIZE)),
+        RIGHT(new Vector2(Constants.BLOCK_SIZE, 0)),
+        LEFT(new Vector2(-Constants.BLOCK_SIZE, 0));
+
+
         private Vector2 dir;
         Direction(Vector2 dir) {
             this.dir = dir;
@@ -67,11 +54,5 @@ public class Constants {
             return super.toString();
         }
     }
-
-
-    // Dificulty Screen
-    public static final String EASY_LABEL = "Fácil";
-    public static final String NORMAL_LABEL = "Normal";
-    public static final String HARD_LABEL = "Difícil";
 
 }
