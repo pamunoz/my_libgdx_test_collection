@@ -24,6 +24,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 
 public class SnakeScreen extends InputAdapter implements Screen {
 
+    // Screen members
     SpriteBatch batch;
     BitmapFont font;
 
@@ -33,13 +34,12 @@ public class SnakeScreen extends InputAdapter implements Screen {
 
     ShapeRenderer mRenderer;
 
-    Array<Vector2> mTail;
-
-    Vector2 mFoodPosition;
+    private boolean gameover;
 
     float secondPassed;
 
-    private boolean gameover;
+    // Snake Members
+    Array<Vector2> mTail;
 
     private Vector2 mPosition;
     // the index of the array of directions
@@ -50,6 +50,10 @@ public class SnakeScreen extends InputAdapter implements Screen {
     // y direction down, up, right, left
     private float[] dy = {-Constants.BLOCK_SIZE, Constants.BLOCK_SIZE, 0, 0};
 
+    // Food members
+
+    Vector2 mFoodPosition;
+
     public SnakeScreen(SimpleSnake game) {
         this.mGame = game;
     }
@@ -58,7 +62,7 @@ public class SnakeScreen extends InputAdapter implements Screen {
     public void show() {
 
         resetFoodPosition();
-        mSnakeViewport = new ExtendViewport(Constants.WORLD_WIDTH, Constants.WORLD_HEIGHT);
+        mSnakeViewport = new FitViewport(Constants.WORLD_WIDTH, Constants.WORLD_HEIGHT);
         //mSnakeViewport = new FitViewport(Constants.WORLD_WIDTH, Constants.WORLD_HEIGHT);
         mRenderer = new ShapeRenderer();
         mRenderer.setAutoShapeType(true);
@@ -88,17 +92,19 @@ public class SnakeScreen extends InputAdapter implements Screen {
         secondPassed += delta;
 
         mSnakeViewport.apply();
-        Gdx.gl.glClearColor(
-                Constants.BACKGROUND_COLOR.r,
-                Constants.BACKGROUND_COLOR.g,
-                Constants.BACKGROUND_COLOR.b,
-                Constants.BACKGROUND_COLOR.a);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+        prepareScreen();
 
         mRenderer.setProjectionMatrix(mSnakeViewport.getCamera().combined);
         mRenderer.begin();
         drawGrid(mRenderer);
         // draw the snake
+        drawGame();
+        mRenderer.end();
+
+    }
+
+    private void drawGame() {
         if (!gameover) {
             drawSnake(mRenderer);
             drawFood(mRenderer);
@@ -106,27 +112,7 @@ public class SnakeScreen extends InputAdapter implements Screen {
 
             // draw a block ahead removing the last one
             if (secondPassed > 0.2f) { // Gdx.graphics.getFramesPerSecond() % 5 == 0
-                Vector2 newPosition = new Vector2(mTail.get(0).x + dx[mDirection], mTail.get(0).y + dy[mDirection]);
-                //ensureSnakeInBounds(newPosition);
-                mTail.insert(0, newPosition);
-                // the conditions for dying
-                if (mTail.get(0).x < 0 || mTail.get(0).y < 0 ||
-                        mTail.get(0).x >= Constants.WORLD_WIDTH || mTail.get(0).y >= Constants.WORLD_HEIGHT) {
-                    gameover = true;
-                }
-                // if the head (mTail.get(0)) is equal to any of its tail members gameover trued
-                for (int i = 1; i < mTail.size; i++) {
-                    if (mTail.get(0).epsilonEquals(mTail.get(i), 0.01f)) {
-                        gameover = true;
-                    }
-                }
-                // condition if the snake eats the food
-                if (hasEaten(newPosition)) {
-                    resetFoodPosition();
-                } else {
-                    // remove the last block
-                    Vector2 someVector = mTail.pop();
-                }
+                updateSnake();
                 secondPassed = 0;
             }
 
@@ -136,11 +122,7 @@ public class SnakeScreen extends InputAdapter implements Screen {
             font.draw(batch, "GAME OVER", mSnakeViewport.getWorldWidth() / 4, mSnakeViewport.getWorldHeight() / 2);
             batch.end();
         }
-        mRenderer.end();
-
     }
-
-
 
     @Override
     public void resize(int width, int height) {
@@ -171,6 +153,30 @@ public class SnakeScreen extends InputAdapter implements Screen {
 
     }
     // ============ Snake Methods =======================
+
+    private void updateSnake() {
+        Vector2 newPosition = new Vector2(mTail.get(0).x + dx[mDirection], mTail.get(0).y + dy[mDirection]);
+        //ensureSnakeInBounds(newPosition);
+        mTail.insert(0, newPosition);
+        // the conditions for dying
+        if (mTail.get(0).x < 0 || mTail.get(0).y < 0 ||
+                mTail.get(0).x >= Constants.WORLD_WIDTH || mTail.get(0).y >= Constants.WORLD_HEIGHT) {
+            gameover = true;
+        }
+        // if the head (mTail.get(0)) is equal to any of its tail members gameover trued
+        for (int i = 1; i < mTail.size; i++) {
+            if (mTail.get(0).epsilonEquals(mTail.get(i), 0.01f)) {
+                gameover = true;
+            }
+        }
+        // condition if the snake eats the food
+        if (hasEaten(newPosition)) {
+            resetFoodPosition();
+        } else {
+            // remove the last block
+            Vector2 someVector = mTail.pop();
+        }
+    }
 
     private boolean hasEaten(Vector2 position) {
         if (position.epsilonEquals(mFoodPosition, 0.2f)) {
@@ -244,16 +250,6 @@ public class SnakeScreen extends InputAdapter implements Screen {
         mFoodPosition.scl(Constants.BLOCK_SIZE);
     }
 
-    private void ensureFoodInBounds() {
-        if (mFoodPosition.x > Constants.COLUMNS * Constants.BLOCK_SIZE - Constants.BLOCK_SIZE || mFoodPosition.x < 0) {
-            resetFoodPosition();
-        } else if (mFoodPosition.y > Constants.ROWS * Constants.BLOCK_SIZE - Constants.BLOCK_SIZE || mFoodPosition.y < 0) {
-            resetFoodPosition();
-        }
-    }
-
-
-
 
     // ================== Input Handling ==============
 
@@ -275,6 +271,14 @@ public class SnakeScreen extends InputAdapter implements Screen {
             init();
         }
         return super.keyDown(keycode);
+    }
 
+    private void prepareScreen() {
+        Gdx.gl.glClearColor(
+                Constants.BACKGROUND_COLOR.r,
+                Constants.BACKGROUND_COLOR.g,
+                Constants.BACKGROUND_COLOR.b,
+                Constants.BACKGROUND_COLOR.a);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
     }
 }
