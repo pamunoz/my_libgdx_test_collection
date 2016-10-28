@@ -56,9 +56,7 @@ public class SnakeScreen extends InputAdapter implements Screen {
 
     @Override
     public void show() {
-        gameover = false;
-        secondPassed = 0;
-        mFoodPosition = new Vector2();
+
         resetFoodPosition();
         mSnakeViewport = new ExtendViewport(Constants.WORLD_WIDTH, Constants.WORLD_HEIGHT);
         //mSnakeViewport = new FitViewport(Constants.WORLD_WIDTH, Constants.WORLD_HEIGHT);
@@ -76,6 +74,11 @@ public class SnakeScreen extends InputAdapter implements Screen {
     }
 
     public void init() {
+        mTail.clear();
+        gameover = false;
+        mFoodPosition = new Vector2();
+        resetFoodPosition();
+        secondPassed = 0;
         mPosition = new Vector2();
         mTail.add(mPosition);
     }
@@ -102,7 +105,7 @@ public class SnakeScreen extends InputAdapter implements Screen {
 
 
             // draw a block ahead removing the last one
-            if (secondPassed > 0.5f) { // Gdx.graphics.getFramesPerSecond() % 5 == 0
+            if (secondPassed > 0.2f) { // Gdx.graphics.getFramesPerSecond() % 5 == 0
                 Vector2 newPosition = new Vector2(mTail.get(0).x + dx[mDirection], mTail.get(0).y + dy[mDirection]);
                 //ensureSnakeInBounds(newPosition);
                 mTail.insert(0, newPosition);
@@ -110,6 +113,12 @@ public class SnakeScreen extends InputAdapter implements Screen {
                 if (mTail.get(0).x < 0 || mTail.get(0).y < 0 ||
                         mTail.get(0).x >= Constants.WORLD_WIDTH || mTail.get(0).y >= Constants.WORLD_HEIGHT) {
                     gameover = true;
+                }
+                // if the head (mTail.get(0)) is equal to any of its tail members gameover trued
+                for (int i = 1; i < mTail.size; i++) {
+                    if (mTail.get(0).epsilonEquals(mTail.get(i), 0.01f)) {
+                        gameover = true;
+                    }
                 }
                 // condition if the snake eats the food
                 if (hasEaten(newPosition)) {
@@ -254,12 +263,15 @@ public class SnakeScreen extends InputAdapter implements Screen {
         // TODO: change the array of directions to Array of Vector 2
         // TODO: test the rotate90 of Vector2 to rotate
         int newDirection = keycode == Keys.S ? 0 : (keycode == Keys.W ? 1 : (keycode == Keys.D) ? 2 : (keycode == Keys.A ? 3 : -1));
-        if (newDirection != -1) mDirection = newDirection;
+        // once the snake is longer than once we shoud not be able to go back
+        if (newDirection != -1
+                && (mTail.size <= 1 ||
+                !(mTail.get(1).x == mTail.get(0).x + dx[newDirection]
+                        && mTail.get(1).y == mTail.get(0).y + dy[newDirection]))) mDirection = newDirection;
         // if it is gameover and is press any key
         // TODO: change the init method, is not reseting the game
         // https://www.youtube.com/watch?v=JGW5ecDOjjk the video of the tutorial 8:42 min
         if (gameover = true && keycode == Keys.ANY_KEY) {
-            gameover = false;
             init();
         }
         return super.keyDown(keycode);
