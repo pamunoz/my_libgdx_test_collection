@@ -32,15 +32,13 @@ public class Food {
     public void resetFoodPosition() {
         int x = MathUtils.floor(MathUtils.random(Constants.COLUMNS));
         int y = MathUtils.floor(MathUtils.random(Constants.ROWS));
+
         mFoodPosition = new Vector2(x, y);
         mFoodPosition.scl(Constants.BLOCK_SIZE);
-    }
-
-    public void setFoodPosition(Vector2 foodPosition) {
-        this.mFoodPosition = foodPosition;
     }
 
     public Vector2 getFoodPosition() {
         return mFoodPosition;
     }
+
 }
