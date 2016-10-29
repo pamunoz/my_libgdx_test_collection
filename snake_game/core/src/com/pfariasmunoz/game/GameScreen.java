@@ -1,6 +1,7 @@
 package com.pfariasmunoz.game;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
@@ -35,12 +36,16 @@ public class GameScreen extends InputAdapter implements Screen {
 
     private boolean mGameOver;
 
+    private int mScore;
+
     public GameScreen(SnakeGame game) {
         this.mGame = game;
     }
 
     @Override
     public void show() {
+        mScore = 0;
+
         mBatch = new SpriteBatch();
 
         mFont = new BitmapFont();
@@ -54,9 +59,10 @@ public class GameScreen extends InputAdapter implements Screen {
         mSnake = new Snake(mSnakeViewport);
         mFood = new Food(mSnakeViewport);
         mFood.resetFoodPosition();
+        mGameOver = false;
 
         mSecondsElapsed = 0;
-        mGameOver = false;
+
 
         Gdx.input.setInputProcessor(this);
     }
@@ -68,6 +74,7 @@ public class GameScreen extends InputAdapter implements Screen {
 
     @Override
     public void render(float delta) {
+        mScore = mSnake.getSize() - 1;
         mSecondsElapsed += delta;
 
         mSnakeViewport.apply();
@@ -82,6 +89,10 @@ public class GameScreen extends InputAdapter implements Screen {
         mRenderer.begin();
         drawBorder(mRenderer);
         // drawGrid(mRenderer);
+        mBatch.setProjectionMatrix(mSnakeViewport.getCamera().combined);
+        mBatch.begin();
+        mFont.draw(mBatch, "Points: " + mScore, mSnakeViewport.getWorldWidth() / 20, mSnakeViewport.getWorldHeight() / 20 * 19);
+        mBatch.end();
 
         if (!mGameOver) {
             mSnake.update();
@@ -91,22 +102,18 @@ public class GameScreen extends InputAdapter implements Screen {
             if (mSecondsElapsed > 0.2f) {
                 mSnake.addBlock();
                 if (mSnake.isDead()) {
-                    mGameOver = true;
+                   mGameOver = true;
                 }
-
                 if (mSnake.hasEaten(mFood.getFoodPosition())) {
                     mFood.resetFoodPosition();
-                    if (mSnake.isColliding(mFood.getFoodPosition())) {
+                    while (mSnake.isColliding(mFood.getFoodPosition())) {
                         mFood.resetFoodPosition();
                     }
-
                 } else {
                     mSnake.removeLastElement();
                 }
-
                 mSecondsElapsed = 0;
             }
-
         } else {
             mBatch.setProjectionMatrix(mSnakeViewport.getCamera().combined);
             mBatch.begin();
@@ -117,6 +124,7 @@ public class GameScreen extends InputAdapter implements Screen {
         mRenderer.end();
 
     }
+
 
     @Override
     public void hide() {
@@ -168,4 +176,12 @@ public class GameScreen extends InputAdapter implements Screen {
 
     }
 
+    @Override
+    public boolean keyDown(int keycode) {
+        if (keycode == Input.Keys.ANY_KEY && mGameOver) {
+            System.out.println("Game over: ");
+            mGameOver = false;
+        }
+        return super.keyDown(keycode);
+    }
 }

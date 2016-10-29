@@ -15,28 +15,24 @@ public class Snake {
     private Vector2 mPosition;
     private int mDirIndex;
 
-    private float mDeltaElapsed;
-
     private Array<Vector2> mTail;
     private Array<Vector2> mDirection;
 
     private Viewport viewport;
 
     public Snake(Viewport viewport) {
-
-        mDirIndex = 2;
-        mTail = new Array<Vector2>();
         this.viewport = viewport;
         init();
     }
 
     public void init() {
+        mDirIndex = 2;
+        mTail = new Array<Vector2>();
         mDirection = new Array<Vector2>();
         mDirection.add(Constants.UP);
         mDirection.add(Constants.DOWN);
         mDirection.add(Constants.RIGHT);
         mDirection.add(Constants.LEFT);
-        mDeltaElapsed = 0;
         mPosition = new Vector2(0, 0);
         mTail.add(mPosition);
     }
@@ -96,14 +92,31 @@ public class Snake {
     }
 
     public void update() {
+
         if (Gdx.input.isKeyPressed(Keys.RIGHT)) {
-            mDirIndex = 2;
+            if (mTail.size == 1) {
+                mDirIndex = 2;
+            } else {
+                mDirIndex = mDirIndex != 3 ? 2 : 3;
+            }
         } else if (Gdx.input.isKeyPressed(Keys.LEFT)) {
-            mDirIndex = 3;
+            if (mTail.size == 1) {
+                mDirIndex = 3;
+            } else {
+                mDirIndex = mDirIndex != 2 ? 3 : 2;
+            }
         } else if (Gdx.input.isKeyPressed(Keys.UP)) {
-            mDirIndex = 0;
+            if (mTail.size == 1) {
+                mDirIndex = 0;
+            } else {
+                mDirIndex = mDirIndex != 1 ? 0 : 1;
+            }
         } else if (Gdx.input.isKeyPressed(Keys.DOWN)) {
-            mDirIndex = 1;
+            if (mTail.size == 1) {
+                mDirIndex = 1;
+            } else {
+                mDirIndex = mDirIndex != 0 ? 1 : 0;
+            }
         }
     }
 
