@@ -17,6 +17,19 @@ public class Constants {
     public static final Vector2 UP = new Vector2(0, Constants.BLOCK_SIZE);
     public static final Vector2 DOWN = new Vector2(0, -Constants.BLOCK_SIZE);
 
+    // Background colors
+    public static final Color BG_COLOR_1 = new Color(0.063f, 0.063f, 0.18f, 1.0f);
+    public static final Color BG_COLOR_2 = new Color(0.078f, 0.078f, 0.306f, 1.0f);
+
+    // Apple colors
+    public static final Color APPLE_COLOR_1 = new Color(1.0f, 0.769f, 0.78f, 1.0f);
+    public static final Color APPLE_COLOR_2 = new Color(1.0f, 0.757f, 0.35f, 1.0f);
+    public static final Color APPLE_COLOR_3 = new Color(0.761f, 0.592f, 0.82f, 1.0f);
+
+    // snake colors
+    public static final Color SNAKE_COLOR_1 = new Color(0.137f, 0.137f, 0.761f, 1.0f);
+    public static final Color SNAKE_COLOR_2 = new Color(0.196f, 0.196f, 0.902f, 1.0f);
+
     public static final float HUD_FONT_REFERENCE_SCREEN_SIZE = 480.0f;
 
 }

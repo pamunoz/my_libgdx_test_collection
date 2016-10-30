@@ -40,7 +40,7 @@ public class Snake {
 
     public void render(ShapeRenderer renderer) {
         renderer.set(ShapeType.Filled);
-        renderer.setColor(0.8f, 0.8f, 1.0f, 1.0f);
+        renderer.setColor(0.545f, 0.545f, 0.964f, 1.0f);
         for (int i = 0; i < mTail.size; i++) {
             renderer.rect(mTail.get(i).x, mTail.get(i).y,
                     Constants.BLOCK_SIZE, Constants.BLOCK_SIZE);
@@ -140,6 +140,44 @@ public class Snake {
 
     public int getScore() {
         return mTail.size -1;
+    }
+
+    public void turnCounterClockWise() {
+        int newIndex = 2;
+        switch (mDirIndex) {
+            case 2:
+                newIndex = 0;
+                break;
+            case 3:
+                newIndex = 1;
+                break;
+            case 0:
+                newIndex = 3;
+                break;
+            case 1:
+                newIndex = 2;
+                break;
+        }
+        mDirIndex = newIndex;
+    }
+
+    public void turnClockWise() {
+        int newIndex = 2;
+        switch (mDirIndex) {
+            case 2:
+                newIndex = 1;
+                break;
+            case 3:
+                newIndex = 0;
+                break;
+            case 0:
+                newIndex = 2;
+                break;
+            case 1:
+                newIndex = 3;
+                break;
+        }
+        mDirIndex = newIndex;
     }
 
 }

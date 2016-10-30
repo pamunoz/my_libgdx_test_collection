@@ -25,7 +25,7 @@ public class Food {
 
     public void render(ShapeRenderer renderer) {
         renderer.set(ShapeType.Filled);
-        renderer.setColor(Color.CHARTREUSE);
+        renderer.setColor(0.76f, 0.592f, 0.0823f, 1.0f);
         renderer.rect(mFoodPosition.x, mFoodPosition.y, Constants.BLOCK_SIZE, Constants.BLOCK_SIZE);
     }
 
