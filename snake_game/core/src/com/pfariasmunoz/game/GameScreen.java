@@ -11,8 +11,9 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
-import com.badlogic.gdx.utils.viewport.ExtendViewport;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 
@@ -22,10 +23,13 @@ public class GameScreen extends InputAdapter implements Screen {
     public static final String TAG = GameScreen.class.getName();
     // prepare the game
     private SnakeGame mGame;
-    private SpriteBatch mBatch;
-    private BitmapFont mFont;
+
     private Viewport mSnakeViewport;
     private ShapeRenderer mRenderer;
+
+    private ScreenViewport hudViewport;
+    private BitmapFont mFont;
+    private SpriteBatch mBatch;
 
     // prepare players
 
@@ -36,7 +40,7 @@ public class GameScreen extends InputAdapter implements Screen {
 
     private boolean mGameOver;
 
-    private int mScore;
+    private int topScore;
 
     public GameScreen(SnakeGame game) {
         this.mGame = game;
@@ -44,38 +48,49 @@ public class GameScreen extends InputAdapter implements Screen {
 
     @Override
     public void show() {
-        mScore = 0;
 
+        mSnakeViewport = new FitViewport(Constants.WORLD_WIDTH, Constants.WORLD_HEIGHT);
+
+        mRenderer = new ShapeRenderer();
+        mRenderer.setAutoShapeType(true);
+
+        hudViewport = new ScreenViewport();
         mBatch = new SpriteBatch();
 
         mFont = new BitmapFont();
         mFont.getRegion().getTexture().setFilter(TextureFilter.Linear, TextureFilter.Linear);
-        mFont.getData().setScale(2.0f);
-
-        mSnakeViewport = new FitViewport(Constants.WORLD_WIDTH, Constants.WORLD_HEIGHT);
-        mRenderer = new ShapeRenderer();
-        mRenderer.setAutoShapeType(true);
+        mFont.getData().setScale(3.0f);
 
         mSnake = new Snake(mSnakeViewport);
         mFood = new Food(mSnakeViewport);
         mFood.resetFoodPosition();
+
+        Gdx.input.setInputProcessor(this);
+
+        topScore = 0;
+
+
         mGameOver = false;
 
         mSecondsElapsed = 0;
-
-
-        Gdx.input.setInputProcessor(this);
     }
 
     @Override
     public void resize(int width, int height) {
         mSnakeViewport.update(width, height, true);
+        hudViewport.update(width, height, true);
+        mFont.getData().setScale(Math.min(width, height) / Constants.HUD_FONT_REFERENCE_SCREEN_SIZE);
+
+        mSnake.init();
+        mFood.resetFoodPosition();
     }
 
     @Override
     public void render(float delta) {
-        mScore = mSnake.getSize() - 1;
+        mSnake.update();
+
         mSecondsElapsed += delta;
+        mGameOver = mSnake.isDead();
 
         mSnakeViewport.apply();
         Gdx.gl.glClearColor(
@@ -85,25 +100,23 @@ public class GameScreen extends InputAdapter implements Screen {
                 Constants.BACKGROUND_COLOR.a);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
+
+        // Render the snake
         mRenderer.setProjectionMatrix(mSnakeViewport.getCamera().combined);
         mRenderer.begin();
         drawBorder(mRenderer);
         // drawGrid(mRenderer);
-        mBatch.setProjectionMatrix(mSnakeViewport.getCamera().combined);
-        mBatch.begin();
-        mFont.draw(mBatch, "Points: " + mScore, mSnakeViewport.getWorldWidth() / 20, mSnakeViewport.getWorldHeight() / 20 * 19);
-        mBatch.end();
 
         if (!mGameOver) {
-            mSnake.update();
+
             mSnake.render(mRenderer);
             mFood.render(mRenderer);
 
             if (mSecondsElapsed > 0.2f) {
                 mSnake.addBlock();
-                if (mSnake.isDead()) {
-                   mGameOver = true;
-                }
+//                if (mSnake.isDead()) {
+//                   mGameOver = true;
+//                }
                 if (mSnake.hasEaten(mFood.getFoodPosition())) {
                     mFood.resetFoodPosition();
                     while (mSnake.isColliding(mFood.getFoodPosition())) {
@@ -123,8 +136,20 @@ public class GameScreen extends InputAdapter implements Screen {
 
         mRenderer.end();
 
-    }
+        hudViewport.apply();
+        mBatch.setProjectionMatrix(hudViewport.getCamera().combined);
+        mBatch.begin();
 
+        topScore = Math.max(topScore, mSnake.getScore() - 1);
+
+        mFont.draw(mBatch, "Score: " + mSnake.getScore(),
+                hudViewport.getWorldWidth() - 30.0f, hudViewport.getWorldHeight() - 30.0f,
+                0, Align.right, false);
+        mBatch.end();
+
+
+
+    }
 
     @Override
     public void hide() {

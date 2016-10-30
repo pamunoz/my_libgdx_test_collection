@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 public class Snake {
@@ -117,6 +118,10 @@ public class Snake {
             } else {
                 mDirIndex = mDirIndex != 0 ? 1 : 0;
             }
+        } else if (isDead()) {
+            if (Gdx.input.isKeyPressed(Keys.ANY_KEY)) {
+                init();
+            }
         }
     }
 
@@ -133,8 +138,8 @@ public class Snake {
         return answer;
     }
 
-    public int getSize() {
-        return mTail.size;
+    public int getScore() {
+        return mTail.size -1;
     }
 
 }
