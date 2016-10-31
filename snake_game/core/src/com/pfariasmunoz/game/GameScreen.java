@@ -3,6 +3,7 @@ package com.pfariasmunoz.game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
+import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -44,7 +45,15 @@ public class GameScreen extends InputAdapter implements Screen {
 
     private float speeder;
 
-    private int speedIncreaser;
+    // to save the last player score
+
+    private Preferences preferences;
+
+    private int savedScore;
+
+    private int topScore;
+
+
 
     public GameScreen(SnakeGame game) {
         this.mGame = game;
@@ -52,6 +61,8 @@ public class GameScreen extends InputAdapter implements Screen {
 
     @Override
     public void show() {
+
+
 
         speeder = 0.7f;
 
@@ -74,9 +85,13 @@ public class GameScreen extends InputAdapter implements Screen {
         Gdx.input.setInputProcessor(this);
 
         mGameOver = false;
-        speedIncreaser = mSnake.getScore();
 
         mSecondsElapsed = 0;
+
+        preferences = Gdx.app.getPreferences("my-preferences");
+
+        topScore = preferences.getInteger("Top Score");
+
     }
 
     @Override
@@ -91,6 +106,8 @@ public class GameScreen extends InputAdapter implements Screen {
 
     @Override
     public void render(float delta) {
+
+
 
         if (mGameOver) {
             mFont.getData().setScale(3.0f);
@@ -117,6 +134,11 @@ public class GameScreen extends InputAdapter implements Screen {
         //drawBorder(mRenderer);
         // drawGrid(mRenderer);
 
+        topScore = Math.max(topScore, mSnake.getScore());
+        preferences.putInteger("Top Score", topScore);
+        preferences.flush();
+
+
         if (!mGameOver) {
 
             drawBackground(mRenderer);
@@ -128,15 +150,15 @@ public class GameScreen extends InputAdapter implements Screen {
 
                 mSnake.addBlock();
                 if (mSnake.isDead()) {
-                   mGameOver = true;
+
+                    mGameOver = true;
                 }
                 if (mSnake.hasEaten(mFood.getFoodPosition())) {
-                    speeder *= 0.99f;
                     // check if the num of food item eaten are multiples of 10
                     // and encrease the speed
-//                    if (mSnake.getScore() % 10 == 0) {
-//                        speeder *= 0.95;
-//                    }
+                    if (mSnake.getScore() % 10 == 0) {
+                        speeder *= 0.9;
+                    }
                     mFood.resetFoodPosition();
                     while (mSnake.isColliding(mFood.getFoodPosition())) {
                         mFood.resetFoodPosition();
@@ -159,7 +181,7 @@ public class GameScreen extends InputAdapter implements Screen {
             mBatch.setProjectionMatrix(hudViewport.getCamera().combined);
             mBatch.begin();
             mFont.setColor(1.0f, 0.8745f, 0.4901f, 1.0f);
-            mFont.draw(mBatch, "Score: " + mSnake.getScore() + "\nSpeed: " + speeder,
+            mFont.draw(mBatch, "Score: " + mSnake.getScore() + "\nTop Score: " + topScore,
                     hudViewport.getWorldWidth() - 30.0f, hudViewport.getWorldHeight() - 30.0f,
                     0, Align.right, false);
             mBatch.end();
