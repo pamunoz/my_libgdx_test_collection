@@ -14,7 +14,6 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Align;
-import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -43,7 +42,9 @@ public class GameScreen extends InputAdapter implements Screen {
 
     private boolean mGameOver;
 
-    private int topScore;
+    private float speeder;
+
+    private int speedIncreaser;
 
     public GameScreen(SnakeGame game) {
         this.mGame = game;
@@ -51,6 +52,8 @@ public class GameScreen extends InputAdapter implements Screen {
 
     @Override
     public void show() {
+
+        speeder = 0.7f;
 
         mSnakeViewport = new FitViewport(Constants.WORLD_WIDTH, Constants.WORLD_HEIGHT);
 
@@ -70,11 +73,8 @@ public class GameScreen extends InputAdapter implements Screen {
 
         Gdx.input.setInputProcessor(this);
 
-        topScore = 0;
-
-
-
         mGameOver = false;
+        speedIncreaser = mSnake.getScore();
 
         mSecondsElapsed = 0;
     }
@@ -91,6 +91,7 @@ public class GameScreen extends InputAdapter implements Screen {
 
     @Override
     public void render(float delta) {
+
         if (mGameOver) {
             mFont.getData().setScale(3.0f);
         } else {
@@ -109,27 +110,33 @@ public class GameScreen extends InputAdapter implements Screen {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
 
-
-
-
         // Render the snake
         mRenderer.setProjectionMatrix(mSnakeViewport.getCamera().combined);
         mRenderer.begin();
-        drawBackground(mRenderer);
+
         //drawBorder(mRenderer);
         // drawGrid(mRenderer);
 
         if (!mGameOver) {
 
+            drawBackground(mRenderer);
+
             mSnake.render(mRenderer);
             mFood.render(mRenderer);
 
-            if (mSecondsElapsed > 0.2f) {
+            if (mSecondsElapsed > speeder) {
+
                 mSnake.addBlock();
                 if (mSnake.isDead()) {
                    mGameOver = true;
                 }
                 if (mSnake.hasEaten(mFood.getFoodPosition())) {
+                    speeder *= 0.99f;
+                    // check if the num of food item eaten are multiples of 10
+                    // and encrease the speed
+//                    if (mSnake.getScore() % 10 == 0) {
+//                        speeder *= 0.95;
+//                    }
                     mFood.resetFoodPosition();
                     while (mSnake.isColliding(mFood.getFoodPosition())) {
                         mFood.resetFoodPosition();
@@ -142,25 +149,22 @@ public class GameScreen extends InputAdapter implements Screen {
         } else {
             mBatch.setProjectionMatrix(mSnakeViewport.getCamera().combined);
             mBatch.begin();
-            mFont.setColor(MathUtils.random(), MathUtils.random(), MathUtils.random(), 1.0f);
-            mFont.draw(mBatch, "GAME OVER", mSnakeViewport.getWorldWidth() / 6, mSnakeViewport.getWorldHeight() / 2);
+            mFont.setColor(Constants.APPLE_COLOR_3.r, Constants.APPLE_COLOR_3.g, Constants.APPLE_COLOR_3.b, 1.0f);
+            mFont.draw(mBatch, "GAME OVER" + "\nScore: " + mSnake.getScore(), mSnakeViewport.getWorldWidth() /3, mSnakeViewport.getWorldHeight() / 2, 0, Align.center, true);
             mBatch.end();
         }
-
         mRenderer.end();
-
         if (!mGameOver) {
             hudViewport.apply();
             mBatch.setProjectionMatrix(hudViewport.getCamera().combined);
             mBatch.begin();
             mFont.setColor(1.0f, 0.8745f, 0.4901f, 1.0f);
-            mFont.draw(mBatch, "Score: " + mSnake.getScore(),
+            mFont.draw(mBatch, "Score: " + mSnake.getScore() + "\nSpeed: " + speeder,
                     hudViewport.getWorldWidth() - 30.0f, hudViewport.getWorldHeight() - 30.0f,
                     0, Align.right, false);
             mBatch.end();
+
         }
-
-
     }
 
     @Override
