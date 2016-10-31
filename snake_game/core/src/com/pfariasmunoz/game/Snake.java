@@ -6,12 +6,16 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.IntMap;
+import com.badlogic.gdx.utils.ObjectIntMap;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 public class Snake {
 
     public static final String TAG = Snake.class.getName();
+
+    private ObjectIntMap<String> dirMap;
 
     private Vector2 mPosition;
     private int mDirIndex;
@@ -22,11 +26,16 @@ public class Snake {
     private Viewport viewport;
 
     public Snake(Viewport viewport) {
+        dirMap = new ObjectIntMap<String>();
         this.viewport = viewport;
         init();
     }
 
     public void init() {
+        dirMap.put("UP", 0);
+        dirMap.put("DOWN", 1);
+        dirMap.put("RIGHT", 2);
+        dirMap.put("LEFT", 3);
         mDirIndex = 2;
         mTail = new Array<Vector2>();
         mDirection = new Array<Vector2>();
@@ -96,27 +105,27 @@ public class Snake {
 
         if (Gdx.input.isKeyPressed(Keys.RIGHT)) {
             if (mTail.size == 1) {
-                mDirIndex = 2;
+                mDirIndex = dirMap.get("RIGHT", 2);
             } else {
-                mDirIndex = mDirIndex != 3 ? 2 : 3;
+                mDirIndex = mDirIndex != dirMap.get("LEFT", 3) ? dirMap.get("RIGHT", 2) : dirMap.get("LEFT", 3);
             }
         } else if (Gdx.input.isKeyPressed(Keys.LEFT)) {
             if (mTail.size == 1) {
-                mDirIndex = 3;
+                mDirIndex = dirMap.get("LEFT", 3);
             } else {
-                mDirIndex = mDirIndex != 2 ? 3 : 2;
+                mDirIndex = mDirIndex != dirMap.get("RIGHT", 2) ? dirMap.get("LEFT", 3) : dirMap.get("RIGHT", 2);
             }
         } else if (Gdx.input.isKeyPressed(Keys.UP)) {
             if (mTail.size == 1) {
-                mDirIndex = 0;
+                mDirIndex = dirMap.get("UP", 0);
             } else {
-                mDirIndex = mDirIndex != 1 ? 0 : 1;
+                mDirIndex = mDirIndex != dirMap.get("DOWN", 1) ? dirMap.get("UP", 0) : dirMap.get("DOWN", 1);
             }
         } else if (Gdx.input.isKeyPressed(Keys.DOWN)) {
             if (mTail.size == 1) {
-                mDirIndex = 1;
+                mDirIndex = dirMap.get("DOWN", 1);
             } else {
-                mDirIndex = mDirIndex != 0 ? 1 : 0;
+                mDirIndex = mDirIndex != dirMap.get("UP", 0) ? dirMap.get("DOWN", 1) : dirMap.get("UP", 0);
             }
         } else if (isDead()) {
             if (Gdx.input.isKeyPressed(Keys.ANY_KEY)) {
