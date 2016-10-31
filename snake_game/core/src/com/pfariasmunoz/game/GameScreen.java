@@ -150,7 +150,7 @@ public class GameScreen extends InputAdapter implements Screen {
 
                 mSnake.addBlock();
                 if (mSnake.isDead()) {
-
+                    speeder = 0.7f;
                     mGameOver = true;
                 }
                 if (mSnake.hasEaten(mFood.getFoodPosition())) {

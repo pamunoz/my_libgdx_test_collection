@@ -152,19 +152,19 @@ public class Snake {
     }
 
     public void turnCounterClockWise() {
-        int newIndex = 2;
+        int newIndex = dirMap.get("RIGHT", 2);
         switch (mDirIndex) {
             case 2:
-                newIndex = 0;
+                newIndex = dirMap.get("UP", 0);
                 break;
             case 3:
-                newIndex = 1;
+                newIndex = dirMap.get("DOWN", 1);
                 break;
             case 0:
-                newIndex = 3;
+                newIndex = dirMap.get("LEFT", 3);
                 break;
             case 1:
-                newIndex = 2;
+                newIndex = dirMap.get("RIGHT", 2);
                 break;
         }
         mDirIndex = newIndex;
