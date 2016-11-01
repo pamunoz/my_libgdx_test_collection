@@ -3,6 +3,14 @@ package com.pfariasmunoz.game;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
 
+/**
+ * Constants.java
+ * Purpose: this class is for creating default values for the game.
+ *
+ * @author Pablo Muñoz.
+ * @version 1.0 10/07/2016
+ */
+
 public class Constants {
     // Setting up the screen with its grid
     public static final float BLOCK_SIZE = 16;

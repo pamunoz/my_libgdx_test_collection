@@ -2,35 +2,46 @@ package com.pfariasmunoz.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.IntMap;
 import com.badlogic.gdx.utils.ObjectIntMap;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
-public class Snake {
+/**
+ * Snake.java
+ * Purpose: Creates a Snake Object which is the principal character of this game.
+ *
+ * @author Pablo Muñoz.
+ * @version 1.0 10/07/2016
+ */
+
+public class Snake extends InputAdapter {
 
     public static final String TAG = Snake.class.getName();
-
     private ObjectIntMap<String> dirMap;
-
     private Vector2 mPosition;
     private int mDirIndex;
-
     private Array<Vector2> mTail;
     private Array<Vector2> mDirection;
+    private Viewport mViewport;
 
-    private Viewport viewport;
-
+    /**
+     * The contructor of the snake object.
+     *
+     * @param viewport the Viewport necessary to the position of the snake, and its side.
+     */
     public Snake(Viewport viewport) {
         dirMap = new ObjectIntMap<String>();
-        this.viewport = viewport;
+        mViewport = viewport;
         init();
     }
 
+    /**
+     * Initializes the snake object with its directions of movement and its position.
+     */
     public void init() {
         dirMap.put("UP", 0);
         dirMap.put("DOWN", 1);
@@ -43,10 +54,15 @@ public class Snake {
         mDirection.add(Constants.DOWN);
         mDirection.add(Constants.RIGHT);
         mDirection.add(Constants.LEFT);
-        mPosition = new Vector2(0, 0);
+        mPosition = new Vector2(0, mViewport.getWorldHeight() - Constants.BLOCK_SIZE);
         mTail.add(mPosition);
     }
 
+    /**
+     * Render the Snake object to the screen.
+     *
+     * @param renderer the ShapeRenderer that draw the snake.
+     */
     public void render(ShapeRenderer renderer) {
         renderer.set(ShapeType.Filled);
         renderer.setColor(0.545f, 0.545f, 0.964f, 1.0f);
@@ -56,6 +72,9 @@ public class Snake {
         }
     }
 
+    /**
+     * Add a new block to the snake object if it eats food.
+     */
     public void addBlock() {
         // add to the current new position the direction specified by the index
         float x = mTail.first().x + mDirection.get(mDirIndex).x;
@@ -64,19 +83,38 @@ public class Snake {
         mTail.insert(0, newPosition);
     }
 
+    /**
+     * Check whether the snake object has eaten food.
+     *
+     * @param foodPosition the position of the food for comparing with the position of the snake.
+     * @return a boolean if the snake object has eaten.
+     */
     public boolean hasEaten(Vector2 foodPosition) {
         // if the positions of ether vector are equal in a given distance (epsilon)
         return mTail.first().epsilonEquals(foodPosition, 0.2f);
     }
 
+    /**
+     * Removes the last element of the array of the snake sections.
+     */
     public void removeLastElement() {
         mTail.pop();
     }
 
+    /**
+     * Checks if the snake fulfill the condition to be dead.
+     *
+     * @return the boolean value if the snake is dead or not.
+     */
     public boolean isDead() {
         return leaveBounds() || eatsItsTail();
     }
 
+    /**
+     * Convenience method to test if the snake leave the borders.
+     *
+     * @return  the boolean value if the snake leaves the bounds of not.
+     */
     private boolean leaveBounds() {
         boolean answer = false;
         Vector2 snakeHead = mTail.first();
@@ -87,6 +125,11 @@ public class Snake {
 
     }
 
+    /**
+     * Checks if the head of the snake collides with one of its sections.
+     *
+     * @return the bolean value if the snake collide with itself or not.
+     */
     private boolean eatsItsTail() {
         boolean answer = false;
 
@@ -101,6 +144,9 @@ public class Snake {
         return answer;
     }
 
+    /**
+     * checks for the user inputs of the user for the snake to turn in each direction.
+     */
     public void update() {
 
         if (Gdx.input.isKeyPressed(Keys.RIGHT)) {
@@ -134,6 +180,12 @@ public class Snake {
         }
     }
 
+    /**
+     * Check if ether segment of the snake object collide with other element.
+     *
+     * @param obstacle the Vector2 that is the position of the element to check collision.
+     * @return the bolean value if the segment is colliding with another element of the game.
+     */
     public boolean isColliding(Vector2 obstacle) {
         boolean answer = false;
 
@@ -147,10 +199,18 @@ public class Snake {
         return answer;
     }
 
+    /**
+     * Gives the score according with the numbers of items eaten by the snake object.
+     *
+     * @return returns the the length - 1 of the array of sections of the snake.
+     */
     public int getScore() {
         return mTail.size -1;
     }
 
+    /**
+     * Turn counter clockwise the snake object.
+     */
     public void turnCounterClockWise() {
         int newIndex = dirMap.get("RIGHT", 2);
         switch (mDirIndex) {
@@ -170,6 +230,9 @@ public class Snake {
         mDirIndex = newIndex;
     }
 
+    /**
+     * Turn clockwise the snake object.
+     */
     public void turnClockWise() {
         int newIndex = 2;
         switch (mDirIndex) {

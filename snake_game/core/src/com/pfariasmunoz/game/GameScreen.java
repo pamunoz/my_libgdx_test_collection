@@ -5,32 +5,34 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
-
+/**
+ * GameScreen.java
+ * Purpose: This is the Screen of the game.
+ *
+ * @author Pablo Muñoz.
+ * @version 1.0 10/07/2016
+ */
 
 public class GameScreen extends InputAdapter implements Screen {
 
     public static final String TAG = GameScreen.class.getName();
-    // prepare the game
-    private SnakeGame mGame;
 
     private Viewport mSnakeViewport;
     private ShapeRenderer mRenderer;
 
-    private ScreenViewport hudViewport;
+    private ScreenViewport mHudViewport;
     private BitmapFont mFont;
     private SpriteBatch mBatch;
 
@@ -43,35 +45,37 @@ public class GameScreen extends InputAdapter implements Screen {
 
     private boolean mGameOver;
 
-    private float speeder;
+    private float mSpeeder;
 
     // to save the last player score
 
-    private Preferences preferences;
+    private Preferences mPreferences;
 
-    private int savedScore;
+    private int mTopScore;
 
-    private int topScore;
-
-
-
+    /**
+     * Construct a screen for the snake game.
+     *
+     * @param game that uses this screen.
+     */
     public GameScreen(SnakeGame game) {
-        this.mGame = game;
+        SnakeGame mGame = game;
     }
 
+    /**
+     * Initialize the member variables of this screen.
+     */
     @Override
     public void show() {
 
-
-
-        speeder = 0.7f;
+        mSpeeder = 0.7f;
 
         mSnakeViewport = new FitViewport(Constants.WORLD_WIDTH, Constants.WORLD_HEIGHT);
 
         mRenderer = new ShapeRenderer();
         mRenderer.setAutoShapeType(true);
 
-        hudViewport = new ScreenViewport();
+        mHudViewport = new ScreenViewport();
         mBatch = new SpriteBatch();
 
         mFont = new BitmapFont();
@@ -88,26 +92,35 @@ public class GameScreen extends InputAdapter implements Screen {
 
         mSecondsElapsed = 0;
 
-        preferences = Gdx.app.getPreferences("my-preferences");
+        mPreferences = Gdx.app.getPreferences("my-mPreferences");
 
-        topScore = preferences.getInteger("Top Score");
+        mTopScore = mPreferences.getInteger("Top Score");
 
     }
 
+    /**
+     * Update the screen when the screen resize.
+     *
+     * @param width the width of the screen.
+     * @param height the height of the screen.
+     */
     @Override
     public void resize(int width, int height) {
         mSnakeViewport.update(width, height, true);
-        hudViewport.update(width, height, true);
+        mHudViewport.update(width, height, true);
         mFont.getData().setScale(Math.min(width, height) / 320.0f);
 
         mSnake.init();
         mFood.resetFoodPosition();
     }
 
+    /**
+     * Render the game elements to the screen.
+     *
+     * @param delta the time that has passed since the last frame.
+     */
     @Override
     public void render(float delta) {
-
-
 
         if (mGameOver) {
             mFont.getData().setScale(3.0f);
@@ -120,44 +133,43 @@ public class GameScreen extends InputAdapter implements Screen {
         mGameOver = mSnake.isDead();
         mSnakeViewport.setScreenPosition(Gdx.graphics.getWidth() / 5, 0);
 
-
         mSnakeViewport.apply();
         Gdx.gl.glClearColor(
                 Constants.BG_COLOR_2.r, Constants.BG_COLOR_2.g, Constants.BG_COLOR_2.b, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-
         // Render the snake
         mRenderer.setProjectionMatrix(mSnakeViewport.getCamera().combined);
         mRenderer.begin();
 
+
+
         //drawBorder(mRenderer);
         // drawGrid(mRenderer);
 
-        topScore = Math.max(topScore, mSnake.getScore());
-        preferences.putInteger("Top Score", topScore);
-        preferences.flush();
+        mTopScore = Math.max(mTopScore, mSnake.getScore());
+        mPreferences.putInteger("Top Score", mTopScore);
+        mPreferences.flush();
 
 
         if (!mGameOver) {
-
             drawBackground(mRenderer);
 
             mSnake.render(mRenderer);
             mFood.render(mRenderer);
 
-            if (mSecondsElapsed > speeder) {
+            if (mSecondsElapsed > mSpeeder) {
 
                 mSnake.addBlock();
                 if (mSnake.isDead()) {
-                    speeder = 0.7f;
+                    mSpeeder = 0.7f;
                     mGameOver = true;
                 }
                 if (mSnake.hasEaten(mFood.getFoodPosition())) {
                     // check if the num of food item eaten are multiples of 10
                     // and encrease the speed
                     if (mSnake.getScore() % 10 == 0) {
-                        speeder *= 0.9;
+                        mSpeeder *= 0.9;
                     }
                     mFood.resetFoodPosition();
                     while (mSnake.isColliding(mFood.getFoodPosition())) {
@@ -177,12 +189,12 @@ public class GameScreen extends InputAdapter implements Screen {
         }
         mRenderer.end();
         if (!mGameOver) {
-            hudViewport.apply();
-            mBatch.setProjectionMatrix(hudViewport.getCamera().combined);
+            mHudViewport.apply();
+            mBatch.setProjectionMatrix(mHudViewport.getCamera().combined);
             mBatch.begin();
             mFont.setColor(1.0f, 0.8745f, 0.4901f, 1.0f);
-            mFont.draw(mBatch, "Score: " + mSnake.getScore() + "\nTop Score: " + topScore,
-                    hudViewport.getWorldWidth() - 30.0f, hudViewport.getWorldHeight() - 30.0f,
+            mFont.draw(mBatch, "Score: " + mSnake.getScore() + "\nTop Score: " + mTopScore,
+                    mHudViewport.getWorldWidth() - 30.0f, mHudViewport.getWorldHeight() - 30.0f,
                     0, Align.right, false);
             mBatch.end();
 
@@ -196,6 +208,9 @@ public class GameScreen extends InputAdapter implements Screen {
         mFont.dispose();
     }
 
+    /**
+     * disposes of the game resources used.
+     */
     @Override
     public void dispose() {
         mRenderer.dispose();
@@ -203,41 +218,17 @@ public class GameScreen extends InputAdapter implements Screen {
         mFont.dispose();
     }
 
-    private void drawGrid(ShapeRenderer renderer) {
-        renderer.setColor(Color.RED);
-        renderer.set(ShapeType.Line);
-        for (int i = 1; i < Constants.COLUMNS; i ++) {
-            for (int j = 1; j < Constants.ROWS; j ++) {
-                renderer.line(
-                        i * Constants.BLOCK_SIZE, 0,
-                        i * Constants.BLOCK_SIZE, Constants.WORLD_HEIGHT);
-                renderer.line(
-                        0, j * Constants.BLOCK_SIZE,
-                        Constants.WORLD_WIDTH, j * Constants.BLOCK_SIZE
-                );
-            }
-        }
-
-    }
-
+    /**
+     *
+     * @param renderer
+     */
     private void drawBackground(ShapeRenderer renderer) {
         renderer.set(ShapeType.Filled);
         renderer.setColor(Constants.BG_COLOR_1.r,
                 Constants.BG_COLOR_1.g,
                 Constants.BG_COLOR_1.b,
                 Constants.BG_COLOR_1.a);
-
-
         renderer.rect(0, 0, mSnakeViewport.getWorldWidth(), mSnakeViewport.getWorldHeight());
-    }
-
-    private void drawBorder(ShapeRenderer renderer) {
-        renderer.setColor(Color.BLACK);
-        renderer.set(ShapeType.Line);
-        renderer.line(0, 0, Constants.WORLD_WIDTH, 0);
-        renderer.line(0, 0, 0, Constants.WORLD_HEIGHT);
-        renderer.line(0, Constants.WORLD_HEIGHT, Constants.WORLD_WIDTH, Constants.WORLD_HEIGHT);
-        renderer.line(Constants.WORLD_WIDTH, Constants.WORLD_HEIGHT, Constants.WORLD_WIDTH, 0);
     }
 
     @Override
@@ -262,18 +253,20 @@ public class GameScreen extends InputAdapter implements Screen {
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
 
-        Vector2 worldTouch = hudViewport.unproject(new Vector2(screenX, screenY));
+        Vector2 worldTouch = mHudViewport.unproject(new Vector2(screenX, screenY));
 
-        if (worldTouch.x > hudViewport.getWorldWidth() / 2.0f) {
+        if (worldTouch.x > mHudViewport.getWorldWidth() / 2.0f) {
             mSnake.turnClockWise();
         }
 
-        if (worldTouch.x < hudViewport.getWorldWidth() / 2.0f) {
+        if (worldTouch.x < mHudViewport.getWorldWidth() / 2.0f) {
             mSnake.turnCounterClockWise();
         }
 
         if (mGameOver) {
-            if (worldTouch.x > hudViewport.getWorldWidth() / 2 || worldTouch.x < hudViewport.getWorldWidth() / 2) {
+            if (
+                    worldTouch.x > mHudViewport.getWorldWidth() / 2 ||
+                    worldTouch.x < mHudViewport.getWorldWidth() / 2) {
                 mSnake.update();
                 mSnake.init();
                 mGameOver = false;
